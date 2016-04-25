@@ -2,6 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
+    <item android:id="@+id/action_new_destination"
+        android:icon="@drawable/ic_navigation_white"
+        android:title="@string/new_destination"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_white"
+        android:title="@string/settings"
+        app:showAsAction="always"/>
 
     <item android:id="@+id/action_quit"
         android:icon="@drawable/ic_highlight_off_white"

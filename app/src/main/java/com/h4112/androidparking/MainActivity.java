@@ -8,6 +8,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -73,6 +74,11 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+            case R.id.action_settings:
+                Intent activitySettings = new Intent(MainActivity.this, Settings.class);
+                startActivity(activitySettings);
+                return true;
 
             case R.id.action_quit:
                 finish();

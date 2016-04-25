@@ -2,4 +2,19 @@
     <string name="app_name">AndroidParking</string>
     <string name="mapKey">AIzaSyBelsU5muR5AP8vsrB2-AsuZKIcqbT1fm0</string>
     <string name="exit">Quitter</string>
+    <string name="settings">Options</string>
+    <string name="new_destination">Nouvelle destination</string>
+
+    <string name="filtreParking">Filtre parking</string>
+    <string name="filtrePlaces">Filtre places</string>
+
+    <string name="type_parking_titre">Type de places</string>
+    <string name="type_place_titre">Type de parking</string>
+
+    <string name="parkingPrives">Parking privés</string>
+    <string name="parkingPublics">Parking publics</string>
+    <string name="placesLibres">Places libres</string>
+    <string name="placesOccupées">Places occupées</string>
+    <string name="placesEnCoursLiberation">Places sur le point de se libérer</string>
+
 </resources>

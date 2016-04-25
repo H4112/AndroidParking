@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/filtrePlaces">
+
+        <CheckBoxPreference
+            android:title="@string/placesLibres"
+            android:defaultValue="true"
+            android:key="places_libres_key" />
+
+        <CheckBoxPreference
+            android:title="@string/placesOccupées"
+            android:defaultValue="true"
+            android:key="places_occupees_key" />
+
+        <CheckBoxPreference
+            android:title="@string/placesEnCoursLiberation"
+            android:defaultValue="true"
+            android:key="places_en_cours_key" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/filtreParking">
+
+    <CheckBoxPreference
+            android:title="@string/parkingPublics"
+            android:defaultValue="true"
+            android:key="parking_publis_key" />
+
+        <CheckBoxPreference
+            android:title="@string/parkingPrives"
+            android:defaultValue="true"
+            android:key="parking_prives_key" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
