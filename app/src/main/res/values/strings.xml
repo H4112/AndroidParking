@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AndroidParking</string>
+    <string name="mapKey">AIzaSyBelsU5muR5AP8vsrB2-AsuZKIcqbT1fm0</string>
+    <string name="exit">Quitter</string>
+</resources>
