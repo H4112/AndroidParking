@@ -1,79 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout
-        xmlns:sothree="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/sliding_layout"
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.sothree.slidinguppanel.FloatingActionButtonLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="bottom"
-        sothree:umanoPanelHeight="68dp"
-        sothree:umanoShadowHeight="4dp">
+        sothree:umanoFabMode="leave_behind">
 
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+        <com.sothree.slidinguppanel.SlidingUpPanelLayout
+            xmlns:sothree="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/sliding_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            sothree:umanoPanelHeight="68dp"
+            sothree:umanoShadowHeight="4dp">
 
-        <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
 
-        <SearchView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/searchView"/>
+            <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center|top"
-                android:textSize="16sp"/>
-
-            <at.markushi.ui.CircleButton
-                android:id="@+id/boutonItineraire"
-                android:layout_width="64dip"
-                android:layout_height="64dip"
-                android:src="@drawable/ic_direction"
-                android:layout_marginRight="10dp"
-                android:layout_alignParentRight="true"
-                app:cb_color="@android:color/white"  />
-
-            <TextView
+            <SearchView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Place indisponible"
-                android:layout_marginRight="5dp"
-                android:id="@+id/TextIndisponible"
-                android:layout_alignBottom="@+id/boutonIndisponible"
-                android:layout_toLeftOf="@+id/boutonIndisponible"
-                android:layout_toStartOf="@+id/boutonIndisponible" />
+                android:id="@+id/searchView"/>
 
-            <at.markushi.ui.CircleButton
-                android:layout_width="16dip"
-                android:layout_height="16dip"
-                android:src="@drawable/ic_indisponible"
-                app:cb_color="@android:color/white"
-                android:layout_marginTop="10dp"
-                android:layout_below="@+id/boutonItineraire"
-                android:layout_alignLeft="@+id/boutonItineraire"
-                android:layout_alignStart="@+id/boutonItineraire"
-                android:id="@+id/boutonIndisponible" />
+            </RelativeLayout>
 
-        </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
 
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center|top"
+                    android:textSize="16sp"/>
 
-</RelativeLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Place indisponible"
+                    android:layout_marginRight="5dp"
+                    android:id="@+id/TextIndisponible"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignBottom="@+id/boutonIndisponible" />
+
+                <ImageView
+                    android:layout_width="16dip"
+                    android:layout_height="16dip"
+                    android:src="@drawable/ic_indisponible"
+                    android:layout_marginTop="10dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/TextIndisponible"
+                    android:layout_toEndOf="@+id/TextIndisponible"
+                    android:id="@+id/boutonIndisponible" />
+
+            </RelativeLayout>
+
+        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/boutonItineraire"
+            android:layout_width="64dip"
+            android:layout_height="64dip"
+            android:src="@drawable/ic_direction"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true"
+            android:theme="@style/FABTheme"/>
+
+    </com.sothree.slidinguppanel.FloatingActionButtonLayout>
+</FrameLayout>
