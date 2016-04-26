@@ -24,5 +24,6 @@
     <string name="option_location_gare">Où suis-je garé ?</string>
     <string name="option_location_settings">Paramètres</string>
     <string name="option_location_account">Mon compte</string>
+    <string name="location_vehicule">Vous êtes garé quelque part</string>
 
 </resources>

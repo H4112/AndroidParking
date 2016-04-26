@@ -1,6 +1,7 @@
 package com.h4112.androidparking;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -42,6 +43,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleApiClient.OnConnectionFailedListener, LocationListener  {
     private static final int UPDATE_INTERVAL = 10000;
     private static final int FASTEST_UPDATE_INTERVAL = 5000;
+
+    private final int ITEM_PARAMETRES = 0;
+    private final int ITEM_GARE = 1;
+    private final int ITEM_COMPTE = 2;
 
     private GoogleMap googleMap;
     private GoogleApiClient mGoogleApiClient;
@@ -204,8 +209,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (item.getItemId()) {
 
             case R.id.action_search:
-                /*Intent activitySettings = new Intent(MainActivity.this, Settings.class);
-                startActivity(activitySettings);*/
                 return true;
 
             case R.id.action_find_place:
@@ -219,6 +222,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void onDrawerItemSelected(int position) {
         Log.d("MainActivity", "Chose position "+position);
+        switch(position){
+            case ITEM_PARAMETRES:
+                Intent activitySettings = new Intent(MainActivity.this, Settings.class);
+                startActivity(activitySettings);
+                break;
+
+            case ITEM_GARE:
+                Toast.makeText(this, R.string.location_vehicule, Toast.LENGTH_LONG).show();
+                break;
+
+            case ITEM_COMPTE:
+                //TODO
+                break;
+        }
     }
 
     @Override
