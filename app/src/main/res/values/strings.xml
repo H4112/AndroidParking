@@ -16,5 +16,7 @@
     <string name="placesLibres">Places libres</string>
     <string name="placesOccupées">Places occupées</string>
     <string name="placesEnCoursLiberation">Places sur le point de se libérer</string>
+    <string name="unable_to_locate">Impossible de vous localiser.</string>
+    <string name="need_rights">Merci d\'autoriser l\'application à utiliser votre position dans les paramètres.</string>
 
 </resources>
