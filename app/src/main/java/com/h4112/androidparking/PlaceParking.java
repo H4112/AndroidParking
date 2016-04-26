@@ -98,4 +98,12 @@ public class PlaceParking {
     public BitmapDescriptor getIcone(){
         return this.icone;
     }
+
+    public float getLatitude(){
+        return this.latitude;
+    }
+
+    public float getLongitude(){
+        return this.longitude;
+    }
 }
