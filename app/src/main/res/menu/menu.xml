@@ -2,19 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
-    <item android:id="@+id/action_new_destination"
-        android:icon="@drawable/ic_navigation_white"
-        android:title="@string/new_destination"
+    <item android:id="@+id/action_find_place"
+        android:icon="@drawable/ic_star_rate_white_18pt_2x"
+        android:title="@string/best_place"
         app:showAsAction="always"/>
 
-    <item android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings_white"
-        android:title="@string/settings"
-        app:showAsAction="always"/>
-
-    <item android:id="@+id/action_quit"
-        android:icon="@drawable/ic_highlight_off_white"
-        android:title="@string/exit"
+    <item android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_white"
+        android:title="@string/search"
         app:showAsAction="always"/>
 
 </menu>

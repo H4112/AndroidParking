@@ -3,7 +3,8 @@
     <string name="mapKey">AIzaSyBelsU5muR5AP8vsrB2-AsuZKIcqbT1fm0</string>
     <string name="exit">Quitter</string>
     <string name="settings">Options</string>
-    <string name="new_destination">Nouvelle destination</string>
+    <string name="search">Rechercher</string>
+    <string name="best_place">Meilleure place</string>
 
     <string name="filtreParking">Filtre parking</string>
     <string name="filtrePlaces">Filtre places</string>

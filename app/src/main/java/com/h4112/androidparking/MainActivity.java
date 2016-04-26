@@ -148,13 +148,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
-            case R.id.action_settings:
-                Intent activitySettings = new Intent(MainActivity.this, Settings.class);
-                startActivity(activitySettings);
+            case R.id.action_search:
+                /*Intent activitySettings = new Intent(MainActivity.this, Settings.class);
+                startActivity(activitySettings);*/
                 return true;
 
-            case R.id.action_quit:
-                finish();
+            case R.id.action_find_place:
+                //finish();
                 return true;
 
             default:
