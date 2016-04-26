@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -59,10 +60,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mapViewInitialized = false;
     private LatLng myLocation;
     private List<PlaceParking> listePlaces;
+    private PlaceParking selectedPark;
 
     private static final String SAVE_MAP_INIT = "mapViewInitialized";
 
     private ActionBarDrawerToggle toggle;
+    private at.markushi.ui.CircleButton Itinerary;
 
     private String[] MENU_OPTIONS;
 
@@ -86,19 +89,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         initPlayServices();
         initDrawer();
         initDrawerList();
+
+        Itinerary = (at.markushi.ui.CircleButton) this.findViewById(R.id.boutonItineraire);
+        Itinerary.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.w("MainActivity", "From " + Double.toString(myLocation.latitude) + ", " + Double.toString(myLocation.longitude) + " to " +
+                        Float.toString(selectedPark.getLatitude()) + ", " + Float.toString(selectedPark.getLongitude()));
+            }
+        });
     }
 
     public void initParkingList(){
         listePlaces = new ArrayList<>();
 
-        //TODO: Récupérer les places
-        PlaceParking place1 = new PlaceParking("id", PlaceParking.OCCUPEE, 45.768067f,4.8677357f);
-        PlaceParking place2 = new PlaceParking("id", PlaceParking.LIBRE, 45.768080f,4.8677340f);
+        //TODO: Récupérer les places sur le serveur
+        PlaceParking place1 = new PlaceParking("id", PlaceParking.EN_MOUVEMENT, 45.766000f,4.8677357f);
+        PlaceParking place2 = new PlaceParking("id2", PlaceParking.LIBRE, 45.768072f,4.8677355f);
+        PlaceParking place3 = new PlaceParking("id3", PlaceParking.OCCUPEE, 45.770072f,4.8677555f);
 
         listePlaces.add(place1);
         listePlaces.add(place2);
-
-        //displayParkInsideRadius(liste, 10000000f);
+        listePlaces.add(place3);
     }
 
     public PlaceParking findBestPlace(){
@@ -109,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         for(PlaceParking place : listePlaces){
             if(place.getDistanceFromPoint(myLocation) <= minDistance && place.getEtat()!=PlaceParking.OCCUPEE) {
                 bestPlace = place;
+                minDistance = place.getDistanceFromPoint(myLocation);
             }
         }
         return bestPlace;
@@ -257,7 +270,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
 
             case R.id.action_find_place:
-                displayPark(findBestPlace());
+                googleMap.clear();
+                selectedPark = findBestPlace();
+                displayPark(selectedPark);
                 return true;
 
             default:
@@ -328,6 +343,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             googleMap.animateCamera(yourLocation);
 
             mapViewInitialized = true;
+
+            displayParkInsideRadius(listePlaces, 10000000f);
         } else if(googleMap == null) {
             Log.w("MainActivity", "googleMap = null");
         }
@@ -368,4 +385,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .icon(place.getIcone()));
         }
     }
+
+
+
+    // Pour déterminer le chemin à prendre
+    public String getUrl(LatLng src, LatLng dest){
+
+        String urlString = "";
+
+        urlString+=("http://maps.google.com/maps?f=d&hl=en");
+        urlString+=("&saddr=");
+        urlString+=(Double.toString((double) src.latitude));
+        urlString+=(",");
+        urlString+=(Double.toString((double) src.longitude));
+        urlString+=("&daddr=");// to
+        urlString+=(Double.toString((double) dest.latitude));
+        urlString+=(",");
+        urlString+=(Double.toString((double) dest.longitude));
+        urlString+=("&ie=UTF8&0&om=0&output=kml");
+
+        return urlString;
+    }
+
 }
