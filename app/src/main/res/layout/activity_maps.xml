@@ -7,21 +7,8 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+    <include layout="@layout/activity_maps_content" />
+    <include layout="@layout/activity_maps_drawer" />
 
-        <fragment
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.MapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </RelativeLayout>
-
-    <RelativeLayout android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#000"
-        android:layout_gravity="start"/>
 
 </android.support.v4.widget.DrawerLayout>

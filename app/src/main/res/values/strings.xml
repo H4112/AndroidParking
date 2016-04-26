@@ -21,5 +21,8 @@
     <string name="need_rights">Merci d\'autoriser l\'application à utiliser votre position dans les paramètres.</string>
     <string name="nav_drawer_open">Tiroir de navigation ouvert</string>
     <string name="nav_drawer_closed">Tiroir de navigation fermé</string>
+    <string name="option_location_gare">Où suis-je garé ?</string>
+    <string name="option_location_settings">Paramètres</string>
+    <string name="option_location_account">Mon compte</string>
 
 </resources>

@@ -1,8 +1,6 @@
 package com.h4112.androidparking;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -12,11 +10,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.example.googlemaps.R;
@@ -32,6 +32,11 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener  {
@@ -46,9 +51,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private ActionBarDrawerToggle toggle;
 
+    private String[] MENU_OPTIONS;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        MENU_OPTIONS = new String[]{
+                getString(R.string.option_location_settings),
+                getString(R.string.option_location_gare),
+                getString(R.string.option_location_account)
+        };
+
         setContentView(R.layout.activity_maps);
 
         if(savedInstanceState != null) {
@@ -57,8 +71,46 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         initPlayServices();
         initDrawer();
+        initDrawerList();
     }
 
+    /**
+     * Configure la ListView présente dans le tiroir de navigation.
+     */
+    private void initDrawerList() {
+        List<Map<String, String>> options = new ArrayList<>();
+        for(String name : MENU_OPTIONS) {
+            options.add(getNameOnlyMap(name));
+        }
+
+        ListView optionsList = (ListView) findViewById(R.id.optionsListView);
+        if (optionsList != null) {
+            optionsList.setAdapter(new SimpleAdapter(this, options, R.layout.maps_drawer_list_item,
+                    new String[] { "name" }, new int[] { R.id.text1 }));
+
+            optionsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    onDrawerItemSelected(position);
+                }
+            });
+        }
+    }
+
+    /**
+     * Renvoie une nouvelle Map avec seulement un champ "name" renseigné.
+     * @param name Le nom à renseigner
+     * @return La nouvelle map créée
+     */
+    private Map<String, String> getNameOnlyMap(String name) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("name", name);
+        return map;
+    }
+
+    /**
+     * Lance les services Google Play (localisation et carte).
+     */
     private void initPlayServices() {
         try {
             if (googleMap == null) {
@@ -86,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         toggle.syncState();
     }
 
+    /**
+     * Met en place le toggle du tiroir de navigation.
+     */
     private void initDrawer() {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -160,6 +215,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             default:
                 return toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
         }
+    }
+
+    private void onDrawerItemSelected(int position) {
+        Log.d("MainActivity", "Chose position "+position);
     }
 
     @Override
