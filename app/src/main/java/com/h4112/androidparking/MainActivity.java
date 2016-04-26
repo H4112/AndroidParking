@@ -32,7 +32,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap googleMap;
     private GoogleApiClient mGoogleApiClient;
     private boolean mapViewInitialized = false;
+    private LatLng myLocation;
+    private List<PlaceParking> listePlaces;
 
     private static final String SAVE_MAP_INIT = "mapViewInitialized";
 
@@ -77,9 +82,45 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
         }
 
+        initParkingList();
         initPlayServices();
         initDrawer();
         initDrawerList();
+    }
+
+    public void initParkingList(){
+        listePlaces = new ArrayList<>();
+
+        //TODO: Récupérer les places
+        PlaceParking place1 = new PlaceParking("id", PlaceParking.OCCUPEE, 45.768067f,4.8677357f);
+        PlaceParking place2 = new PlaceParking("id", PlaceParking.LIBRE, 45.768080f,4.8677340f);
+
+        listePlaces.add(place1);
+        listePlaces.add(place2);
+
+        //displayParkInsideRadius(liste, 10000000f);
+    }
+
+    public PlaceParking findBestPlace(){
+        //Version naïve: Chemin le plus court à vol d'oiseau
+
+        PlaceParking bestPlace = null;
+        double minDistance = findFirstDistanceFreePlace();
+        for(PlaceParking place : listePlaces){
+            if(place.getDistanceFromPoint(myLocation) <= minDistance && place.getEtat()!=PlaceParking.OCCUPEE) {
+                bestPlace = place;
+            }
+        }
+        return bestPlace;
+    }
+
+    public double findFirstDistanceFreePlace(){
+        for(PlaceParking place : listePlaces){
+            if(place.getEtat()!=PlaceParking.OCCUPEE) {
+                return place.getDistanceFromPoint(myLocation);
+            }
+        }
+        return 0;
     }
 
     /**
@@ -216,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
 
             case R.id.action_find_place:
-                //finish();
+                displayPark(findBestPlace());
                 return true;
 
             default:
@@ -225,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void onDrawerItemSelected(int position) {
-        Log.d("MainActivity", "Chose position "+position);
+        Log.d("MainActivity", "Chose position " + position);
         switch(position){
             case ITEM_PARAMETRES:
                 Intent activitySettings = new Intent(MainActivity.this, Settings.class);
@@ -282,8 +323,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(googleMap != null && !mapViewInitialized) {
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
-            LatLng myPosition = new LatLng(latitude, longitude);
-            CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myPosition, 15);
+            myLocation = new LatLng(latitude, longitude);
+            CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myLocation, 15);
             googleMap.animateCamera(yourLocation);
 
             mapViewInitialized = true;
@@ -301,5 +342,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
         int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
         return px;
+    }
+
+    public void displayParkInsideRadius(List<PlaceParking> listPark, float radius){
+        for(PlaceParking place : listPark){
+            if(place.isInsideCircle(myLocation, radius)){
+                displayPark(place);
+            }
+        }
+    }
+
+    private void displayPark(PlaceParking place){
+        String infos;
+        if(place != null){
+            if(place.getEtat()==PlaceParking.OCCUPEE || place.getEtat()==PlaceParking.EN_MOUVEMENT){
+                infos = "Place occupée depuis "+place.getTempsOccupee();
+            }
+            else{
+                infos = "Place libre depuis "+place.getTempsLibre();
+            }
+            Marker marker = googleMap.addMarker(new MarkerOptions()
+                    .position(place.getCoord())
+                    .title(place.getEtatString())
+                    .snippet("Place")
+                    .icon(place.getIcone()));
+        }
     }
 }
