@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleApiClient.OnConnectionFailedListener, LocationListener  {
     private static final int UPDATE_INTERVAL = 10000;
     private static final int FASTEST_UPDATE_INTERVAL = 5000;
+
+    private final int HAUTEUR_DP_BOUTON_LOCATION=48;
 
     private final int ITEM_PARAMETRES = 0;
     private final int ITEM_GARE = 1;
@@ -184,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap = map;
 
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        googleMap.setPadding(0, dpToPx(HAUTEUR_DP_BOUTON_LOCATION), 0, 0);
 
         // Généré automatiquement
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -273,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.v("MainActivity", "Got a new location: "+location.getLatitude()+" "+location.getLongitude());
+        Log.v("MainActivity", "Got a new location: " + location.getLatitude() + " " + location.getLongitude());
 
         if(googleMap != null && !mapViewInitialized) {
             double latitude = location.getLatitude();
@@ -291,5 +295,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Toast.makeText(this, R.string.unable_to_locate, Toast.LENGTH_LONG).show();
+    }
+
+    private int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
     }
 }

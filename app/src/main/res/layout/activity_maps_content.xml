@@ -14,11 +14,22 @@
         sothree:umanoPanelHeight="68dp"
         sothree:umanoShadowHeight="4dp">
 
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
         <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.MapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+        <SearchView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/searchView"/>
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="fill_parent"
@@ -37,7 +48,7 @@
                 android:src="@drawable/ic_direction"
                 android:layout_marginRight="10dp"
                 android:layout_alignParentRight="true"
-                app:cb_color="#fff"  />
+                app:cb_color="@android:color/white"  />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -54,7 +65,7 @@
                 android:layout_width="16dip"
                 android:layout_height="16dip"
                 android:src="@drawable/ic_indisponible"
-                app:cb_color="#fff"
+                app:cb_color="@android:color/white"
                 android:layout_marginTop="10dp"
                 android:layout_below="@+id/boutonItineraire"
                 android:layout_alignLeft="@+id/boutonItineraire"
