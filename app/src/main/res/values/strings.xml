@@ -18,5 +18,7 @@
     <string name="placesEnCoursLiberation">Places sur le point de se libérer</string>
     <string name="unable_to_locate">Impossible de vous localiser.</string>
     <string name="need_rights">Merci d\'autoriser l\'application à utiliser votre position dans les paramètres.</string>
+    <string name="nav_drawer_open">Tiroir de navigation ouvert</string>
+    <string name="nav_drawer_closed">Tiroir de navigation fermé</string>
 
 </resources>

@@ -9,9 +9,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.googlemaps.R;
@@ -27,7 +32,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
-public class MainActivity extends Activity implements OnMapReadyCallback,
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener  {
     private static final int UPDATE_INTERVAL = 10000;
@@ -39,6 +44,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     private static final String SAVE_MAP_INIT = "mapViewInitialized";
 
+    private ActionBarDrawerToggle toggle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +55,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
         }
 
+        initPlayServices();
+        initDrawer();
+    }
+
+    private void initPlayServices() {
         try {
             if (googleMap == null) {
                 ((MapFragment) getFragmentManager().
@@ -66,6 +78,27 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        toggle.syncState();
+    }
+
+    private void initDrawer() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, R.string.nav_drawer_open, R.string.nav_drawer_closed);
+        if (drawer != null) {
+            drawer.addDrawerListener(toggle);
+        }
+        toggle.syncState();
     }
 
     @Override
@@ -125,7 +158,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 return true;
 
             default:
-                return super.onOptionsItemSelected(item);
+                return toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
         }
     }
 
