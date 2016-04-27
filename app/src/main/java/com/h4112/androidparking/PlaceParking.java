@@ -1,8 +1,10 @@
 package com.h4112.androidparking;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -89,8 +91,17 @@ public class PlaceParking implements Parcelable {
     }
 
     public double getDistanceFromPoint(LatLng point){
-        //TODO utiliser l'api google
-        return ( (point.longitude-this.longitude)*(point.longitude-this.longitude)+(point.latitude-this.latitude)*(point.latitude-this.latitude) );
+        Location me = new Location("generated");
+        me.setLatitude(latitude);
+        me.setLongitude(longitude);
+        Location ref = new Location("generated");
+        ref.setLatitude(point.latitude);
+        ref.setLongitude(point.longitude);
+
+        double dist = me.distanceTo(ref);
+        Log.d("PlaceParking", "Distance = "+dist);
+
+        return dist;
     }
 
     public Etat getEtat(){
