@@ -25,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -81,6 +82,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String[] MENU_OPTIONS;
     private boolean gotFirstSpotList = false;
 
+    private TextView adresse;
+    private TextView etat;
+    private TextView tempsLibreOccupee;
+    private TextView tempsLibreOccupeeTexte;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,6 +132,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             });
         }
+
+        adresse = (TextView)findViewById(R.id.adresse);
+        etat = (TextView)findViewById(R.id.etat);
+        tempsLibreOccupee = (TextView)findViewById(R.id.tempsLibreOccupee);
+        tempsLibreOccupeeTexte = (TextView)findViewById(R.id.texteTempsLibreOccupee);
     }
 
     @Override
@@ -323,6 +334,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.setMyLocationEnabled(true);
 
         displayAllParkingSpots(listePlaces);
+
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            public boolean onMarkerClick(Marker marker) {
+                marker.showInfoWindow();
+
+                selectedPark = markerToPlaceParking(marker);
+                if(selectedPark != null){
+                    adresse.setText(marker.getTitle());
+                    etat.setText(selectedPark.getEtatString());
+                    if(selectedPark.getEtat() != PlaceParking.Etat.OCCUPEE) {
+                        tempsLibreOccupeeTexte.setText("Libre depuis");
+                    }
+                    else if(selectedPark.getEtat() == PlaceParking.Etat.OCCUPEE) {
+                        tempsLibreOccupee.setText("Occupée depuis");
+                    }
+                    tempsLibreOccupee.setText(selectedPark.getDurationString());
+                }
+                else{
+                    Log.w("MainActivity", "Aucune place selectionnée");
+                }
+
+
+                return true;
+            }
+        });
+
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -461,6 +499,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .snippet(place.getEtatString(this))
                     .icon(place.getIcone()));
         }
+    }
+
+    private PlaceParking markerToPlaceParking(Marker marker){
+        for(PlaceParking place: listePlaces){
+            if(place.getCoord().equals(marker.getPosition())){
+                return place;
+            }
+        }
+        return null;
     }
 
     private void displayAndSeletPark(PlaceParking place){

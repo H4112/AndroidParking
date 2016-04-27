@@ -108,6 +108,21 @@ public class PlaceParking implements Parcelable {
         return this.etat;
     }
 
+    public String getEtatString(){
+        if(this.getEtat() == Etat.LIBRE){
+            return "Place Libre";
+        }
+        else if(this.getEtat() == Etat.OCCUPEE){
+            return "Place Occupée";
+        }
+        else if(this.getEtat() == Etat.EN_MOUVEMENT){
+            return "Place Bientôt Libre";
+        }
+        else{
+            return "Place Indéterminée";
+        }
+    }
+
     public String getEtatString(Context c) {
         int hours = this.getDureeEtatActuelMin() / 60;
         int mins = this.getDureeEtatActuelMin() % 60;
@@ -131,6 +146,19 @@ public class PlaceParking implements Parcelable {
             infos = c.getString(R.string.place_en_mouvement_depuis_longtemps);
         }
 
+        return infos;
+    }
+
+    public String getDurationString() {
+        int hours = this.getDureeEtatActuelMin() / 60;
+        int mins = this.getDureeEtatActuelMin() % 60;
+
+        String infos;
+        if(hours == 0) {
+            infos = Integer.toString(mins)+" min";
+        } else {
+            infos = Integer.toString(hours)+"h et "+Integer.toString(mins)+" min";
+        }
         return infos;
     }
 
