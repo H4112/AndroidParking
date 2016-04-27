@@ -27,6 +27,6 @@
     <string name="location_vehicule">Vous êtes garé quelque part</string>
 
     <string name="portee">Portée</string>
-    <string name="afficherPlacesPortee">Places dans un rayon de </string>
+    <string name="afficherPlacesPortee">Afficher les places dans un rayon de</string>
 
 </resources>
