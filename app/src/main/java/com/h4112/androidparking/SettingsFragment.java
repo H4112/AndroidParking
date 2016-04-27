@@ -2,16 +2,10 @@ package com.h4112.androidparking;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.widget.SeekBar;
 
-import com.example.googlemaps.R;
 import com.pavelsikun.seekbarpreference.SeekBarPreference;
 
-import java.util.Map;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 

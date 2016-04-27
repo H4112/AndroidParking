@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,7 +26,6 @@ import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-import com.example.googlemaps.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -36,13 +37,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -51,19 +51,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int UPDATE_INTERVAL = 10000;
     private static final int FASTEST_UPDATE_INTERVAL = 5000;
 
-    private final int ITEM_PARAMETRES = 0;
-    private final int ITEM_GARE = 1;
-    private final int ITEM_COMPTE = 2;
+    private static final int ITEM_PARAMETRES = 0;
+    private static final int ITEM_GARE = 1;
+    private static final int ITEM_COMPTE = 2;
 
     private GoogleMap googleMap;
     private GoogleApiClient mGoogleApiClient;
+
     private boolean mapViewInitialized = false;
     private LatLng myLocation;
-    private List<PlaceParking> listePlaces = new ArrayList<>();
+    private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
     private PlaceParking selectedPark;
 
     private static final String SAVE_MAP_INIT = "mapViewInitialized";
     private static final String SAVE_FIRST_SPOT_LIST = "gotFirstSpotList";
+    private static final String SAVE_SPOT_LIST = "listePlaces";
+    private static final String SAVE_MY_LOCATION = "myLocation";
+    private static final String SAVE_SELECTED_PARK = "selectedPark";
 
     private ActionBarDrawerToggle toggle;
     private android.support.design.widget.FloatingActionButton Itinerary;
@@ -87,6 +91,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(savedInstanceState != null) {
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
             gotFirstSpotList = savedInstanceState.getBoolean(SAVE_FIRST_SPOT_LIST);
+            listePlaces = savedInstanceState.getParcelableArrayList(SAVE_SPOT_LIST);
+            myLocation = savedInstanceState.getParcelable(SAVE_MY_LOCATION);
+            selectedPark = savedInstanceState.getParcelable(SAVE_SELECTED_PARK);
 
             if(mapViewInitialized && !gotFirstSpotList) {
                 runUpdatePlaces();
@@ -120,13 +127,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(SAVE_MAP_INIT, mapViewInitialized);
+        outState.putBoolean(SAVE_FIRST_SPOT_LIST, gotFirstSpotList);
+        outState.putParcelableArrayList(SAVE_SPOT_LIST, listePlaces);
+        outState.putParcelable(SAVE_MY_LOCATION, myLocation);
+        outState.putParcelable(SAVE_SELECTED_PARK, selectedPark);
+    }
+
     private void navigationButtonClicked() {
         Log.w("MainActivity", "From " + Double.toString(myLocation.latitude) + ", " + Double.toString(myLocation.longitude) + " to " +
                 Float.toString(selectedPark.getLatitude()) + ", " + Float.toString(selectedPark.getLongitude()));
     }
 
-    public void setListePlaces(List<PlaceParking> parkingList){
+    public void setListePlaces(ArrayList<PlaceParking> parkingList){
         listePlaces = parkingList;
+        for(PlaceParking p : parkingList) {
+            String address = getCompleteAddressString(p.getLatitude(), p.getLongitude());
+            p.setAddress(address);
+        }
+
         displayAllParkingSpots(listePlaces);
 
         gotFirstSpotList = true;
@@ -259,14 +282,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean(SAVE_MAP_INIT, mapViewInitialized);
-        outState.putBoolean(SAVE_FIRST_SPOT_LIST, gotFirstSpotList);
-    }
-
-    @Override
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
@@ -299,6 +314,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         googleMap.setMyLocationEnabled(true);
+
+        displayAllParkingSpots(listePlaces);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -394,12 +411,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myLocation, 15);
             googleMap.animateCamera(yourLocation);
 
-            runUpdatePlaces();
-
             mapViewInitialized = true;
         } else if(googleMap == null) {
             Log.w("MainActivity", "googleMap = null");
         }
+
+        runUpdatePlaces();
     }
 
     @Override
@@ -408,17 +425,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void displayAllParkingSpots(List<PlaceParking> listPark){
+        googleMap.clear();
+
         for(PlaceParking place : listPark){
             displayPark(place);
         }
     }
 
     private void displayPark(PlaceParking place){
-        String infos;
         if(place != null){
-            Marker marker = googleMap.addMarker(new MarkerOptions()
+            googleMap.addMarker(new MarkerOptions()
                     .position(place.getCoord())
-                    .title("Place")
+                    .title(place.getAddress())
                     .snippet(place.getEtatString(this))
                     .icon(place.getIcone()));
         }
@@ -448,5 +466,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void runUpdatePlaces() {
         FetchParkingSpotsTask task = new FetchParkingSpotsTask(this);
         task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, 100));
+    }
+
+    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append(", ");
+                }
+                strAdd = strReturnedAddress.toString();
+                strAdd = strAdd.substring(0, strAdd.length() - 2);
+                Log.v("MainActivity", "Geotagged " + strAdd.toString());
+            } else {
+                Log.v("MainActivity", "No Address returned!");
+                return getString(R.string.parking_spot);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.v("MainActivity", "Could not get Address!");
+            return getString(R.string.parking_spot);
+        }
+        return strAdd;
     }
 }

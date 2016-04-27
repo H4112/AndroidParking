@@ -12,13 +12,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Permet de récupérer la liste des places de parking dans un rayon donné.
  */
 public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Params,
-        Void, List<PlaceParking>> {
+        Void, ArrayList<PlaceParking>> {
     private MainActivity activity;
 
     public FetchParkingSpotsTask(MainActivity activity) {
@@ -27,7 +26,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
     }
 
     @Override
-    protected List<PlaceParking> doInBackground(Params... params) {
+    protected ArrayList<PlaceParking> doInBackground(Params... params) {
         if(params.length != 1) {
             throw new IllegalArgumentException("This task takes only one Params object");
         }
@@ -54,7 +53,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             return null;
         }
 
-        List<PlaceParking> placesParking = new ArrayList<>();
+        ArrayList<PlaceParking> placesParking = new ArrayList<>();
         try {
             JSONArray sensors = new JSONArray(json);
 
@@ -67,7 +66,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
                         (float) sensor.getDouble("latitude"),
                         (float) sensor.getDouble("longitude"),
                         sensor.getInt("idRue"),
-                        sensor.getLong("derniereMaj") * 1000);
+                        sensor.getLong("derniereMaj"));
 
                 placesParking.add(thisSpot);
 
@@ -91,7 +90,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
     }
 
     @Override
-    protected void onPostExecute(List<PlaceParking> places) {
+    protected void onPostExecute(ArrayList<PlaceParking> places) {
         if(places == null) {
             activity.listePlacesFailure();
         } else {
