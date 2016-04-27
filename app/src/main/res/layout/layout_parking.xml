@@ -63,7 +63,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="Libre depuis"
+                        android:text="..."
                         android:id="@+id/texteTempsLibreOccupee"
                         android:layout_column="0" />
 

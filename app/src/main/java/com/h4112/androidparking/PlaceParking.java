@@ -157,7 +157,7 @@ public class PlaceParking implements Parcelable {
         if(hours == 0) {
             infos = Integer.toString(mins)+" min";
         } else {
-            infos = Integer.toString(hours)+"h et "+Integer.toString(mins)+" min";
+            infos = Integer.toString(hours)+" h et "+Integer.toString(mins)+" min";
         }
         return infos;
     }

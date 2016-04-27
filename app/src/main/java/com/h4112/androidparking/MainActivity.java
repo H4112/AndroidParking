@@ -338,29 +338,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             public boolean onMarkerClick(Marker marker) {
-                marker.showInfoWindow();
-
-                selectedPark = markerToPlaceParking(marker);
-                if(selectedPark != null){
-                    adresse.setText(marker.getTitle());
-                    etat.setText(selectedPark.getEtatString());
-                    if(selectedPark.getEtat() != PlaceParking.Etat.OCCUPEE) {
-                        tempsLibreOccupeeTexte.setText("Libre depuis");
-                    }
-                    else if(selectedPark.getEtat() == PlaceParking.Etat.OCCUPEE) {
-                        tempsLibreOccupee.setText("Occupée depuis");
-                    }
-                    tempsLibreOccupee.setText(selectedPark.getDurationString());
-                }
-                else{
-                    Log.w("MainActivity", "Aucune place selectionnée");
-                }
-
-
+                actionMarkerClick(marker);
                 return true;
             }
         });
 
+    }
+
+    public void actionMarkerClick(Marker marker){
+        marker.showInfoWindow();
+        selectedPark = markerToPlaceParking(marker);
+        updateParkingData();
+    }
+
+    public void updateParkingData(){
+        if(selectedPark != null){
+            adresse.setText(selectedPark.getAddress());
+            etat.setText(selectedPark.getEtatString());
+            if(selectedPark.getEtat() != PlaceParking.Etat.OCCUPEE) {
+                tempsLibreOccupeeTexte.setText("Libre depuis");
+            }
+            else if(selectedPark.getEtat() == PlaceParking.Etat.OCCUPEE) {
+                tempsLibreOccupee.setText("Occupée depuis");
+            }
+            tempsLibreOccupee.setText(selectedPark.getDurationString());
+        }
+        else{
+            Log.d("MainActivity", "Aucune place selectionnée");
+        }
+    }
+
+    public void resetParkingData(){
+        //TODO: Faire un panel par défaut où aucune place n'est sélectionnée
+        if(selectedPark == null){
+            adresse.setText("...");
+            etat.setText("Place ...");
+            tempsLibreOccupeeTexte.setText("...");
+            tempsLibreOccupee.setText("...");
+        }
+        else{
+            Log.d("MainActivity", "Aucune place selectionnée");
+        }
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -390,11 +408,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     googleMap.clear();
                     selectedPark = findBestPlace();
                     displayAndSeletPark(selectedPark);
+                    updateParkingData();
                 }
                 else{
+                    selectedPark = null;
                     item.setIcon(R.drawable.ic_star_rate_white_18pt_2x);
                     googleMap.clear();
                     displayAllParkingSpots(listePlaces);
+                    resetParkingData();
                 }
                 return true;
 
