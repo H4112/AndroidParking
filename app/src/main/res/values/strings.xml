@@ -31,5 +31,8 @@
 
     <string name="portee">Portée</string>
     <string name="afficherPlacesPortee">Places dans un rayon de </string>
+    <string name="place_en_mouvement">Place potentiellement bientôt peut-être libérée</string>
+    <string name="place_occupee">"Place occupée depuis %1$s min"</string>
+    <string name="place_libre">"Place libre depuis %1$s min"</string>
 
 </resources>

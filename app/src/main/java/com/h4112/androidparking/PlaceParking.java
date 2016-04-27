@@ -1,5 +1,7 @@
 package com.h4112.androidparking;
 
+import android.content.Context;
+
 import com.example.googlemaps.R;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -13,17 +15,17 @@ public class PlaceParking {
     private Etat etat;
     private float latitude;
     private float longitude;
-    private long tempsDebutOccupation;
-    private long tempsFinOccupation;
+    private long derniereMaj;
 
     private BitmapDescriptor icone;
 
-    public PlaceParking(int id, Etat etat, float latitude, float longitude, int idRue){
+    public PlaceParking(int id, Etat etat, float latitude, float longitude, int idRue, long derniereMaj){
         this.id=id;
         this.etat=etat;
         this.latitude=latitude;
         this.longitude=longitude;
         this.idRue=idRue;
+        this.derniereMaj=derniereMaj;
 
         updateIcone();
     }
@@ -40,36 +42,8 @@ public class PlaceParking {
         }
     }
 
-    public void setLibre(){
-        this.etat=Etat.LIBRE;
-        this.tempsFinOccupation=System.currentTimeMillis();
-        updateIcone();
-    }
-
-    public void setOccupee(){
-        this.etat=Etat.OCCUPEE;
-        this.tempsDebutOccupation=System.currentTimeMillis();
-        updateIcone();
-    }
-
-    public void setEnMouvement(){
-        this.etat=Etat.EN_MOUVEMENT;
-        updateIcone();
-    }
-
-    public long getTempsLibre(){
-        return (System.currentTimeMillis()-this.tempsFinOccupation);
-    }
-
-    public long getTempsOccupee(){
-        return (System.currentTimeMillis()-this.tempsDebutOccupation);
-    }
-
-    public boolean isInsideCircle(LatLng p, float radius){
-        if( (p.latitude-this.latitude)*(p.latitude-this.latitude)+(p.longitude-this.latitude)*(p.longitude-this.latitude) <= radius*radius ){
-            return true;
-        }
-        return false;
+    public int getDureeEtatActuelMin(){
+        return (int) (System.currentTimeMillis() - derniereMaj) / 60000;
     }
 
     public LatLng getCoord(){
@@ -84,15 +58,17 @@ public class PlaceParking {
         return this.etat;
     }
 
-    public String getEtatString(){
-        if(this.etat == Etat.LIBRE)
-            return "Libre";
-        else if(this.etat == Etat.OCCUPEE)
-            return "Occupée";
-        else if(this.etat == Etat.EN_MOUVEMENT)
-            return "Sur le point de se libérer";
-        else
-            return "Etat indéterminé";
+    public String getEtatString(Context c){
+        String infos;
+        if(this.getEtat()==PlaceParking.Etat.OCCUPEE){
+            infos = c.getString(R.string.place_occupee, this.getDureeEtatActuelMin()+"");
+        } else if(this.getEtat()== PlaceParking.Etat.LIBRE){
+            infos = c.getString(R.string.place_libre, this.getDureeEtatActuelMin()+"");
+        } else {
+            infos = c.getString(R.string.place_en_mouvement);
+        }
+
+        return infos;
     }
 
     public BitmapDescriptor getIcone(){
@@ -107,17 +83,13 @@ public class PlaceParking {
         return this.longitude;
     }
 
-    @Override
-    public String toString() {
-        return "PlaceParking{" +
-                "id=" + id +
-                ", idRue=" + idRue +
-                ", etat=" + etat +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                ", tempsDebutOccupation=" + tempsDebutOccupation +
-                ", tempsFinOccupation=" + tempsFinOccupation +
-                ", icone=" + icone +
-                '}';
+    public PlaceParking(int id, int idRue, Etat etat, float latitude, float longitude, long derniereMaj, BitmapDescriptor icone) {
+        this.id = id;
+        this.idRue = idRue;
+        this.etat = etat;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.derniereMaj = derniereMaj;
+        this.icone = icone;
     }
 }

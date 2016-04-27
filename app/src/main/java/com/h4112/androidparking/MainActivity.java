@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,12 +63,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PlaceParking selectedPark;
 
     private static final String SAVE_MAP_INIT = "mapViewInitialized";
+    private static final String SAVE_FIRST_SPOT_LIST = "gotFirstSpotList";
 
     private ActionBarDrawerToggle toggle;
     private android.support.design.widget.FloatingActionButton Itinerary;
     private SearchView searchview;
 
     private String[] MENU_OPTIONS;
+    private boolean gotFirstSpotList = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if(savedInstanceState != null) {
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
+            gotFirstSpotList = savedInstanceState.getBoolean(SAVE_FIRST_SPOT_LIST);
+
+            if(mapViewInitialized && !gotFirstSpotList) {
+                runUpdatePlaces();
+            }
         }
 
         initPlayServices();
@@ -90,14 +98,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         initDrawerList();
 
         searchview = (SearchView) findViewById(R.id.search);
-        searchview.setVisibility(View.GONE);
-        searchview.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                searchview.setVisibility(View.GONE);
-                return false;
-            }
-        });
+        if (searchview != null) {
+            searchview.setVisibility(View.GONE);
+            searchview.setOnCloseListener(new SearchView.OnCloseListener() {
+                @Override
+                public boolean onClose() {
+                    searchview.setVisibility(View.GONE);
+                    return false;
+                }
+            });
+        }
 
         Itinerary = (FloatingActionButton) findViewById(R.id.boutonItineraire);
         if (Itinerary != null) {
@@ -118,19 +128,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void setListePlaces(List<PlaceParking> parkingList){
         listePlaces = parkingList;
         displayAllParkingSpots(listePlaces);
+
+        gotFirstSpotList = true;
     }
 
     public void listePlacesFailure() {
-        new AlertDialog.Builder(this)
-                .setMessage(getString(R.string.error_getting_parks))
-                .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        runUpdatePlaces();
-                    }
-                })
-                .setNegativeButton(getString(R.string.close), null)
-                .show();
+        if(!gotFirstSpotList) {
+            new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.error_getting_parks))
+                    .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            runUpdatePlaces();
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
     }
 
     private PlaceParking findBestPlace(){
@@ -243,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onSaveInstanceState(outState);
 
         outState.putBoolean(SAVE_MAP_INIT, mapViewInitialized);
+        outState.putBoolean(SAVE_FIRST_SPOT_LIST, gotFirstSpotList);
     }
 
     @Override
@@ -395,16 +416,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void displayPark(PlaceParking place){
         String infos;
         if(place != null){
-            if(place.getEtat()==PlaceParking.Etat.OCCUPEE || place.getEtat()==PlaceParking.Etat.EN_MOUVEMENT){
-                infos = "Place occupée depuis "+place.getTempsOccupee();
-            }
-            else{
-                infos = "Place libre depuis "+place.getTempsLibre();
-            }
             Marker marker = googleMap.addMarker(new MarkerOptions()
                     .position(place.getCoord())
-                    .title(place.getEtatString())
-                    .snippet("Place")
+                    .title("Place")
+                    .snippet(place.getEtatString(this))
                     .icon(place.getIcone()));
         }
     }

@@ -32,6 +32,8 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             throw new IllegalArgumentException("This task takes only one Params object");
         }
 
+        Log.d("FetchParkingSpotsTask", "Beginning download of sensors from the server");
+
         Params param = params[0];
 
         String json = "";
@@ -60,11 +62,12 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
                 JSONObject sensor = sensors.getJSONObject(i);
 
                 PlaceParking thisSpot = new PlaceParking(
-                        Integer.parseInt(sensor.getString("id")),
+                        sensor.getInt("id"),
                         getState(sensor.getString("etat")),
-                        Float.parseFloat(sensor.getString("latitude")),
-                        Float.parseFloat(sensor.getString("longitude")),
-                        Integer.parseInt(sensor.getString("idRue")));
+                        (float) sensor.getDouble("latitude"),
+                        (float) sensor.getDouble("longitude"),
+                        sensor.getInt("idRue"),
+                        sensor.getLong("derniereMaj") * 1000);
 
                 placesParking.add(thisSpot);
 
