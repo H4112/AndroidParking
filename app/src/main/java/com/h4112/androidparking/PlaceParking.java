@@ -99,7 +99,7 @@ public class PlaceParking implements Parcelable {
         ref.setLongitude(point.longitude);
 
         double dist = me.distanceTo(ref);
-        Log.d("PlaceParking", "Distance = "+dist);
+        Log.v("PlaceParking", "Distance = "+dist);
 
         return dist;
     }

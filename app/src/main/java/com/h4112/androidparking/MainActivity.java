@@ -8,6 +8,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -59,9 +60,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
 
     private boolean mapViewInitialized = false;
-    private LatLng myLocation;
+    private LatLng myLocation = null;
     private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
     private PlaceParking selectedPark;
+
+    private Handler handler = new Handler();
+    private Runnable update = null;
 
     private static final String SAVE_MAP_INIT = "mapViewInitialized";
     private static final String SAVE_FIRST_SPOT_LIST = "gotFirstSpotList";
@@ -70,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String SAVE_SELECTED_PARK = "selectedPark";
 
     private ActionBarDrawerToggle toggle;
-    private android.support.design.widget.FloatingActionButton Itinerary;
     private SearchView searchview;
 
     private String[] MENU_OPTIONS;
@@ -94,10 +97,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             listePlaces = savedInstanceState.getParcelableArrayList(SAVE_SPOT_LIST);
             myLocation = savedInstanceState.getParcelable(SAVE_MY_LOCATION);
             selectedPark = savedInstanceState.getParcelable(SAVE_SELECTED_PARK);
-
-            if(mapViewInitialized && !gotFirstSpotList) {
-                runUpdatePlaces();
-            }
         }
 
         initPlayServices();
@@ -116,9 +115,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             });
         }
 
-        Itinerary = (FloatingActionButton) findViewById(R.id.boutonItineraire);
-        if (Itinerary != null) {
-            Itinerary.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton itinerary = (FloatingActionButton) findViewById(R.id.boutonItineraire);
+        if (itinerary != null) {
+            itinerary.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     navigationButtonClicked();
@@ -157,12 +156,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void listePlacesFailure() {
         if(!gotFirstSpotList) {
+            stopUpdateTimer();
+
             new AlertDialog.Builder(this)
                     .setMessage(getString(R.string.error_getting_parks))
                     .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            runUpdatePlaces();
+                            startUpdateTimer();
                         }
                     })
                     .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
@@ -285,12 +286,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
+
+        startUpdateTimer();
     }
 
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
+
+        stopUpdateTimer();
     }
 
     public void onMapReady(GoogleMap map) {
@@ -404,10 +409,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onLocationChanged(Location location) {
         Log.v("MainActivity", "Got a new location: " + location.getLatitude() + " " + location.getLongitude());
 
+        boolean myLocationWasNull = (myLocation == null);
+
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        myLocation = new LatLng(latitude, longitude);
+
+        if(myLocationWasNull) {
+            startUpdateTimer();
+        }
+
         if(googleMap != null && !mapViewInitialized) {
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            myLocation = new LatLng(latitude, longitude);
             CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myLocation, 15);
             googleMap.animateCamera(yourLocation);
 
@@ -415,8 +427,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(googleMap == null) {
             Log.w("MainActivity", "googleMap = null");
         }
-
-        runUpdatePlaces();
     }
 
     @Override
@@ -461,6 +471,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         urlString+=("&ie=UTF8&0&om=0&output=kml");
 
         return urlString;
+    }
+
+    private void startUpdateTimer() {
+        startUpdateTimer(0);
+    }
+
+    private void startUpdateTimer(int delay) {
+        Log.d("MainActivity", "Update timer STARTED! Delay "+delay);
+
+        update = new Runnable() {
+            @Override
+            public void run() {
+                if(myLocation != null) {
+                    runUpdatePlaces();
+                    startUpdateTimer(10000);
+                } else {
+                    Log.d("MainActivity", "myLocation = null, timer stopped");
+                }
+            }
+        };
+
+        handler.postDelayed(update, delay);
+    }
+
+    private void stopUpdateTimer() {
+        Log.d("MainActivity", "Update timer STOPPED!");
+
+        if(update != null) {
+            handler.removeCallbacks(update);
+        }
     }
 
     private void runUpdatePlaces() {
