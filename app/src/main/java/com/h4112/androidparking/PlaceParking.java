@@ -6,12 +6,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 
 public class PlaceParking {
-    public static int LIBRE = 0;
-    public static int OCCUPEE = 1;
-    public static int EN_MOUVEMENT = 2;
+    public enum Etat { LIBRE, OCCUPEE, EN_MOUVEMENT }
 
-    private String id;
-    private int etat;
+    private int id;
+    private int idRue;
+    private Etat etat;
     private float latitude;
     private float longitude;
     private long tempsDebutOccupation;
@@ -19,20 +18,21 @@ public class PlaceParking {
 
     private BitmapDescriptor icone;
 
-    public PlaceParking(String id, int etat, float latitude, float longitude){
+    public PlaceParking(int id, Etat etat, float latitude, float longitude, int idRue){
         this.id=id;
         this.etat=etat;
         this.latitude=latitude;
         this.longitude=longitude;
+        this.idRue=idRue;
 
         updateIcone();
     }
 
     public void updateIcone(){
-        if(this.etat == LIBRE){
+        if(this.etat == Etat.LIBRE){
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_libre);
         }
-        else if(this.etat == OCCUPEE){
+        else if(this.etat == Etat.OCCUPEE){
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_occupee);
         }
         else{
@@ -41,19 +41,19 @@ public class PlaceParking {
     }
 
     public void setLibre(){
-        this.etat=LIBRE;
+        this.etat=Etat.LIBRE;
         this.tempsFinOccupation=System.currentTimeMillis();
         updateIcone();
     }
 
     public void setOccupee(){
-        this.etat=OCCUPEE;
+        this.etat=Etat.OCCUPEE;
         this.tempsDebutOccupation=System.currentTimeMillis();
         updateIcone();
     }
 
     public void setEnMouvement(){
-        this.etat=EN_MOUVEMENT;
+        this.etat=Etat.EN_MOUVEMENT;
         updateIcone();
     }
 
@@ -80,16 +80,16 @@ public class PlaceParking {
         return ( (point.longitude-this.longitude)*(point.longitude-this.longitude)+(point.latitude-this.latitude)*(point.latitude-this.latitude) );
     }
 
-    public int getEtat(){
+    public Etat getEtat(){
         return this.etat;
     }
 
     public String getEtatString(){
-        if(this.etat == LIBRE)
+        if(this.etat == Etat.LIBRE)
             return "Libre";
-        else if(this.etat == OCCUPEE)
+        else if(this.etat == Etat.OCCUPEE)
             return "Occupée";
-        else if(this.etat == EN_MOUVEMENT)
+        else if(this.etat == Etat.EN_MOUVEMENT)
             return "Sur le point de se libérer";
         else
             return "Etat indéterminé";
@@ -105,5 +105,19 @@ public class PlaceParking {
 
     public float getLongitude(){
         return this.longitude;
+    }
+
+    @Override
+    public String toString() {
+        return "PlaceParking{" +
+                "id=" + id +
+                ", idRue=" + idRue +
+                ", etat=" + etat +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", tempsDebutOccupation=" + tempsDebutOccupation +
+                ", tempsFinOccupation=" + tempsFinOccupation +
+                ", icone=" + icone +
+                '}';
     }
 }

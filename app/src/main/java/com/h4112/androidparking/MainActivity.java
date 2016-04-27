@@ -1,6 +1,7 @@
 package com.h4112.androidparking;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -11,8 +12,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
     private boolean mapViewInitialized = false;
     private LatLng myLocation;
-    private List<PlaceParking> listePlaces;
+    private List<PlaceParking> listePlaces = new ArrayList<>();
     private PlaceParking selectedPark;
 
     private static final String SAVE_MAP_INIT = "mapViewInitialized";
@@ -84,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
         }
 
-        initParkingList();
         initPlayServices();
         initDrawer();
         initDrawerList();
@@ -115,26 +115,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Float.toString(selectedPark.getLatitude()) + ", " + Float.toString(selectedPark.getLongitude()));
     }
 
-    public void initParkingList(){
-        listePlaces = new ArrayList<>();
-
-        //TODO: Récupérer les places sur le serveur
-        PlaceParking place1 = new PlaceParking("id", PlaceParking.EN_MOUVEMENT, 45.766000f,4.8677357f);
-        PlaceParking place2 = new PlaceParking("id2", PlaceParking.LIBRE, 45.768072f,4.8677355f);
-        PlaceParking place3 = new PlaceParking("id3", PlaceParking.OCCUPEE, 45.770072f,4.8677555f);
-
-        listePlaces.add(place1);
-        listePlaces.add(place2);
-        listePlaces.add(place3);
+    public void setListePlaces(List<PlaceParking> parkingList){
+        listePlaces = parkingList;
+        displayAllParkingSpots(listePlaces);
     }
 
-    public PlaceParking findBestPlace(){
+    public void listePlacesFailure() {
+        new AlertDialog.Builder(this)
+                .setMessage(getString(R.string.error_getting_parks))
+                .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        runUpdatePlaces();
+                    }
+                })
+                .setNegativeButton(getString(R.string.close), null)
+                .show();
+    }
+
+    private PlaceParking findBestPlace(){
         //Version naïve: Chemin le plus court à vol d'oiseau
 
         PlaceParking bestPlace = null;
         double minDistance = findFirstDistanceFreePlace();
         for(PlaceParking place : listePlaces){
-            if(place.getDistanceFromPoint(myLocation) <= minDistance && place.getEtat()!=PlaceParking.OCCUPEE) {
+            if(place.getDistanceFromPoint(myLocation) <= minDistance && place.getEtat()!=PlaceParking.Etat.OCCUPEE) {
                 bestPlace = place;
                 minDistance = place.getDistanceFromPoint(myLocation);
             }
@@ -142,9 +147,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return bestPlace;
     }
 
-    public double findFirstDistanceFreePlace(){
+    private double findFirstDistanceFreePlace(){
         for(PlaceParking place : listePlaces){
-            if(place.getEtat()!=PlaceParking.OCCUPEE) {
+            if(place.getEtat()!=PlaceParking.Etat.OCCUPEE) {
                 return place.getDistanceFromPoint(myLocation);
             }
         }
@@ -368,9 +373,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myLocation, 15);
             googleMap.animateCamera(yourLocation);
 
-            mapViewInitialized = true;
+            runUpdatePlaces();
 
-            displayParkInsideRadius(listePlaces, 10000000f);
+            mapViewInitialized = true;
         } else if(googleMap == null) {
             Log.w("MainActivity", "googleMap = null");
         }
@@ -381,18 +386,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toast.makeText(this, R.string.unable_to_locate, Toast.LENGTH_LONG).show();
     }
 
-    public void displayParkInsideRadius(List<PlaceParking> listPark, float radius){
+    private void displayAllParkingSpots(List<PlaceParking> listPark){
         for(PlaceParking place : listPark){
-            if(place.isInsideCircle(myLocation, radius)){
-                displayPark(place);
-            }
+            displayPark(place);
         }
     }
 
     private void displayPark(PlaceParking place){
         String infos;
         if(place != null){
-            if(place.getEtat()==PlaceParking.OCCUPEE || place.getEtat()==PlaceParking.EN_MOUVEMENT){
+            if(place.getEtat()==PlaceParking.Etat.OCCUPEE || place.getEtat()==PlaceParking.Etat.EN_MOUVEMENT){
                 infos = "Place occupée depuis "+place.getTempsOccupee();
             }
             else{
@@ -409,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     // Pour déterminer le chemin à prendre
-    public String getUrl(LatLng src, LatLng dest){
+    private String getUrl(LatLng src, LatLng dest){
 
         String urlString = "";
 
@@ -427,4 +430,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return urlString;
     }
 
+    private void runUpdatePlaces() {
+        FetchParkingSpotsTask task = new FetchParkingSpotsTask(this);
+        task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, 100));
+    }
 }
