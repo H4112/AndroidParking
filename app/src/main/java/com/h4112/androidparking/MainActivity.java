@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -87,6 +88,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView tempsLibreOccupee;
     private TextView tempsLibreOccupeeTexte;
 
+    private RelativeLayout scrollablePanel;
+    private FloatingActionButton itinerary;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             });
         }
 
-        FloatingActionButton itinerary = (FloatingActionButton) findViewById(R.id.boutonItineraire);
+        itinerary = (FloatingActionButton) findViewById(R.id.boutonItineraire);
         if (itinerary != null) {
             itinerary.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -137,6 +141,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         etat = (TextView)findViewById(R.id.etat);
         tempsLibreOccupee = (TextView)findViewById(R.id.tempsLibreOccupee);
         tempsLibreOccupeeTexte = (TextView)findViewById(R.id.texteTempsLibreOccupee);
+
+        scrollablePanel = (RelativeLayout) findViewById(R.id.scrollablePanel);
+
+        setScrollablePanelInvisible();
     }
 
     @Override
@@ -343,6 +351,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                resetParkingData();
+            }
+        });
+
     }
 
     public void actionMarkerClick(Marker marker){
@@ -352,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void updateParkingData(){
+        setScrollablePanelVisible();
         if(selectedPark != null){
             adresse.setText(selectedPark.getAddress());
             etat.setText(selectedPark.getEtatString());
@@ -369,16 +385,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void resetParkingData(){
-        //TODO: Faire un panel par défaut où aucune place n'est sélectionnée
+        setScrollablePanelInvisible();
         if(selectedPark == null){
             adresse.setText("...");
             etat.setText("Place ...");
             tempsLibreOccupeeTexte.setText("...");
             tempsLibreOccupee.setText("...");
         }
-        else{
-            Log.d("MainActivity", "Aucune place selectionnée");
+    }
+
+    public void setScrollablePanelVisible(){
+        for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
+            View view = scrollablePanel.getChildAt(i);
+            view.setVisibility(View.VISIBLE);
         }
+        //scrollablePanel.setVisibility(View.VISIBLE);
+        itinerary.setVisibility(View.VISIBLE);
+    }
+
+    public void setScrollablePanelInvisible(){
+        for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
+            View view = scrollablePanel.getChildAt(i);
+            view.setVisibility(View.INVISIBLE);
+        }
+        //scrollablePanel.setVisibility(View.INVISIBLE);
+        itinerary.setVisibility(View.INVISIBLE);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -543,8 +574,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }
-
-
 
     // Pour déterminer le chemin à prendre
     private String getUrl(LatLng src, LatLng dest){
