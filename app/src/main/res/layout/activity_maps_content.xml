@@ -40,38 +40,7 @@
 
             </RelativeLayout>
 
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center|top"
-                    android:textSize="16sp"/>
-
-                <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Place indisponible"
-                android:layout_marginRight="5dp"
-                android:id="@+id/TextIndisponible"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignBottom="@+id/boutonIndisponible" />
-
-                <ImageView
-                    android:layout_width="16dip"
-                    android:layout_height="16dip"
-                    android:src="@drawable/ic_indisponible"
-                    android:layout_marginTop="10dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/TextIndisponible"
-                    android:layout_toEndOf="@+id/TextIndisponible"
-                    android:id="@+id/boutonIndisponible" />
-
-            </RelativeLayout>
+            <include layout="@layout/layout_parking"/>
 
         </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 

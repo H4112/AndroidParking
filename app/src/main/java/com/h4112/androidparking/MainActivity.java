@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
 
     private boolean mapViewInitialized = false;
+    private boolean isParkingSelected = false;
     private LatLng myLocation = null;
     private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
     private PlaceParking selectedPark;
@@ -344,9 +345,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
 
             case R.id.action_find_place:
-                googleMap.clear();
-                selectedPark = findBestPlace();
-                displayPark(selectedPark);
+                isParkingSelected = ! isParkingSelected;
+                if(isParkingSelected) {
+                    item.setIcon(R.drawable.ic_full_star);
+                    googleMap.clear();
+                    selectedPark = findBestPlace();
+                    displayPark(selectedPark);
+                }
+                else{
+                    item.setIcon(R.drawable.ic_star_rate_white_18pt_2x);
+                    googleMap.clear();
+                    displayAllParkingSpots(listePlaces);
+                }
                 return true;
 
             default:
