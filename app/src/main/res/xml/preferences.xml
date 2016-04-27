@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sample="http://schemas.android.com/apk/res-auto">
+    >
 
     <PreferenceCategory
         android:title="@string/filtrePlaces">
@@ -33,6 +35,19 @@
             android:title="@string/parkingPrives"
             android:defaultValue="true"
             android:key="parking_prives_key" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/portee">
+
+        <com.pavelsikun.seekbarpreference.SeekBarPreference
+            android:key="portee"
+            android:title="@string/afficherPlacesPortee"
+            android:defaultValue="200"
+            sample:msbp_minValue="10"
+            sample:msbp_maxValue="1000"
+            sample:msbp_measurementUnit="m"/>
 
     </PreferenceCategory>
 

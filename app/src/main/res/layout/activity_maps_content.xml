@@ -51,12 +51,12 @@
                     android:textSize="16sp"/>
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Place indisponible"
-                    android:layout_marginRight="5dp"
-                    android:id="@+id/TextIndisponible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Place indisponible"
+                android:layout_marginRight="5dp"
+                android:id="@+id/TextIndisponible"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_alignBottom="@+id/boutonIndisponible" />

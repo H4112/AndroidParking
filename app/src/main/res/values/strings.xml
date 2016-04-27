@@ -26,4 +26,7 @@
     <string name="option_location_account">Mon compte</string>
     <string name="location_vehicule">Vous êtes garé quelque part</string>
 
+    <string name="portee">Portée</string>
+    <string name="afficherPlacesPortee">Places dans un rayon de </string>
+
 </resources>
