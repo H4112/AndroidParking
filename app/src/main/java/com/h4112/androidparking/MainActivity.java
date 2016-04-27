@@ -260,6 +260,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         googleMap.setPadding(0, dpToPx(HAUTEUR_DP_BOUTON_LOCATION), 0, 0);
 
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+
         // Généré automatiquement
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
