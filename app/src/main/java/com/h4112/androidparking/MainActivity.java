@@ -49,8 +49,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int UPDATE_INTERVAL = 10000;
     private static final int FASTEST_UPDATE_INTERVAL = 5000;
 
-    private final int HAUTEUR_DP_BOUTON_LOCATION=48;
-
     private final int ITEM_PARAMETRES = 0;
     private final int ITEM_GARE = 1;
     private final int ITEM_COMPTE = 2;
@@ -258,9 +256,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap = map;
 
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        googleMap.setPadding(0, dpToPx(HAUTEUR_DP_BOUTON_LOCATION), 0, 0);
 
         googleMap.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.getUiSettings().setCompassEnabled(false);
+        googleMap.getUiSettings().setRotateGesturesEnabled(false);
 
         // Généré automatiquement
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -287,7 +286,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             case R.id.action_search:
                 searchview.setIconified(false);
-                searchview.setVisibility(View.VISIBLE);
+                if(searchview.getVisibility() == View.VISIBLE) {
+                    searchview.setVisibility(View.GONE);
+                    searchview.setQuery("", false);
+                } else {
+                    searchview.setVisibility(View.VISIBLE);
+                }
+
                 return true;
 
             case R.id.action_find_place:
@@ -374,12 +379,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Toast.makeText(this, R.string.unable_to_locate, Toast.LENGTH_LONG).show();
-    }
-
-    private int dpToPx(int dp) {
-        DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
-        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-        return px;
     }
 
     public void displayParkInsideRadius(List<PlaceParking> listPark, float radius){
