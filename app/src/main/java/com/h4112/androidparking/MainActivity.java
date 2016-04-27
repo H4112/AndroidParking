@@ -38,6 +38,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -350,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     item.setIcon(R.drawable.ic_full_star);
                     googleMap.clear();
                     selectedPark = findBestPlace();
-                    displayPark(selectedPark);
+                    displayAndSeletPark(selectedPark);
                 }
                 else{
                     item.setIcon(R.drawable.ic_star_rate_white_18pt_2x);
@@ -462,6 +463,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void displayAndSeletPark(PlaceParking place){
+        if(place != null){
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(place.getCoord())
+                    .title(place.getAddress())
+                    .snippet(place.getEtatString(this))
+                    .icon(place.getIcone());
+            Marker marker = googleMap.addMarker(markerOptions);
+            marker.showInfoWindow();
+
+        }
+    }
+
 
 
     // Pour déterminer le chemin à prendre
@@ -490,19 +504,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void startUpdateTimer(int delay) {
         Log.d("MainActivity", "Update timer STARTED! Delay "+delay);
 
-        update = new Runnable() {
-            @Override
-            public void run() {
-                if(myLocation != null) {
-                    runUpdatePlaces();
-                    startUpdateTimer(10000);
-                } else {
-                    Log.d("MainActivity", "myLocation = null, timer stopped");
+        if(!isParkingSelected) {
+            update = new Runnable() {
+                @Override
+                public void run() {
+                    if (myLocation != null) {
+                        runUpdatePlaces();
+                        startUpdateTimer(10000);
+                    } else {
+                        Log.d("MainActivity", "myLocation = null, timer stopped");
+                    }
                 }
-            }
-        };
+            };
 
-        handler.postDelayed(update, delay);
+            handler.postDelayed(update, delay);
+        }
     }
 
     private void stopUpdateTimer() {
