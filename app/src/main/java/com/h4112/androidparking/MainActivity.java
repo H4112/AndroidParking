@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private ActionBarDrawerToggle toggle;
     private android.support.design.widget.FloatingActionButton Itinerary;
+    private SearchView searchview;
 
     private String[] MENU_OPTIONS;
 
@@ -88,6 +90,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         initPlayServices();
         initDrawer();
         initDrawerList();
+
+        searchview = (SearchView) findViewById(R.id.search);
+        searchview.setVisibility(View.GONE);
+        searchview.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                searchview.setVisibility(View.GONE);
+                return false;
+            }
+        });
 
         Itinerary = (FloatingActionButton) findViewById(R.id.boutonItineraire);
         if (Itinerary != null) {
@@ -272,6 +284,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (item.getItemId()) {
 
             case R.id.action_search:
+                searchview.setIconified(false);
+                searchview.setVisibility(View.VISIBLE);
                 return true;
 
             case R.id.action_find_place:
