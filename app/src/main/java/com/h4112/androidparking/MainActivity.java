@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -201,6 +202,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void launchNavigation(){
         //TODO
         Log.d("MainActivity", "--- Lancement de la navigation ---");
+
+        String   mode = "&mode=c";
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse(String.format("google.navigation:ll=%s,%s%s",
+                        markerSelectedPark.getPosition().latitude, markerSelectedPark.getPosition().longitude, mode)));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
     }
 
     public void setListePlaces(ArrayList<PlaceParking> parkingList){
