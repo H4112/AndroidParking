@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ListView optionsList = (ListView) findViewById(R.id.optionsListView);
         if (optionsList != null) {
             optionsList.setAdapter(new SimpleAdapter(this, options, R.layout.maps_drawer_list_item,
-                    new String[] { "name" }, new int[] { R.id.text1 }));
+                    new String[]{"name"}, new int[]{R.id.text1}));
 
             optionsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -343,7 +343,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         displayAllParkingSpots(listePlaces);
 
-
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             public boolean onMarkerClick(Marker marker) {
                 actionMarkerClick(marker);
@@ -363,8 +362,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void actionMarkerClick(Marker marker){
         marker.showInfoWindow();
         isParkingSelected = true;
-        CameraUpdate markerLocation = CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15);
-        googleMap.animateCamera(markerLocation);
+        /*CameraUpdate markerLocation = CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15);
+        googleMap.animateCamera(markerLocation);*/
         selectedPark = markerToPlaceParking(marker);
         updateParkingData();
     }
@@ -398,20 +397,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void setScrollablePanelVisible(){
-        /*for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
+        for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
             View view = scrollablePanel.getChildAt(i);
             view.setVisibility(View.VISIBLE);
-        }*/
-        scrollablePanel.setVisibility(View.VISIBLE);
+        }
+        //scrollablePanel.setVisibility(View.VISIBLE);
         itinerary.setVisibility(View.VISIBLE);
     }
 
     public void setScrollablePanelInvisible(){
-        /*for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
+        for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
             View view = scrollablePanel.getChildAt(i);
             view.setVisibility(View.INVISIBLE);
-        }*/
-        scrollablePanel.setVisibility(View.INVISIBLE);
+        }
+        //scrollablePanel.setVisibility(View.INVISIBLE);
         itinerary.setVisibility(View.INVISIBLE);
     }
 
@@ -436,6 +435,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
 
             case R.id.action_find_place:
+                //Selectionner la meilleure place
                 isParkingSelected = ! isParkingSelected;
                 if(isParkingSelected) {
                     item.setIcon(R.drawable.ic_full_star);
