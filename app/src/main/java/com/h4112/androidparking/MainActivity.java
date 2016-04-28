@@ -45,6 +45,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.text.DecimalFormat;
@@ -70,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mapViewInitialized = false;
     private LatLng myLocation = null;
     private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
-    private Map<PlaceParking, Marker> placeParkingToMarker = new HashMap<>();
     private PlaceParking selectedPark = null;
 
     private Handler handler = new Handler();
@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SlidingUpPanelLayout panelLayout;
     private DrawerLayout drawer;
     private FloatingActionButton itinerary;
+    ClusterManager<PlaceParking> mClusterManager;
 
     private Marker markerSelectedPark;
 
@@ -567,11 +568,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         googleMap.setMyLocationEnabled(true);
 
-        displayAllParkingSpots(listePlaces);
+        mClusterManager = new ClusterManager<>(this, googleMap);
+        mClusterManager.setRenderer(new PlaceParkingClusterRenderer(this, googleMap, mClusterManager));
 
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            public boolean onMarkerClick(Marker marker) {
-                actionMarkerClick(marker);
+        googleMap.setOnCameraChangeListener(mClusterManager);
+        googleMap.setOnMarkerClickListener(mClusterManager);
+
+        mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<PlaceParking>() {
+            @Override
+            public boolean onClusterItemClick(PlaceParking placeParking) {
+                actionMarkerClick(placeParking);
                 return true;
             }
         });
@@ -582,16 +588,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 resetParkingData();
             }
         });
+
+        displayAllParkingSpots(listePlaces);
     }
 
-    public void actionMarkerClick(Marker marker){
+    public void actionMarkerClick(PlaceParking placeParking){
         if(markerSelectedPark!=null){
             markerSelectedPark.remove();
         }
         MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
-                .position(marker.getPosition());
+                .position(placeParking.getPosition());
         markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
-        selectedPark = markerToPlaceParking(marker);
+        selectedPark = placeParking;
 
         updateParkingData();
 
@@ -651,11 +659,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void displayAllParkingSpots(List<PlaceParking> listPark){
         googleMap.clear();
-        placeParkingToMarker.clear();
+        mClusterManager.clearItems();
 
         for(PlaceParking place : listPark){
             displayPark(place);
         }
+        mClusterManager.cluster();
 
         if(selectedPark != null) {
             boolean found = false;
@@ -663,7 +672,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             for(PlaceParking p : listePlaces) {
                 if(p.getId() == selectedPark.getId()) {
                     Log.v("MainActivity", "Auto-Selected parking spot");
-                    actionMarkerClick(placeParkingToMarker.get(p));
+                    actionMarkerClick(p);
                     found = true;
                     break;
                 }
@@ -678,21 +687,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void displayPark(PlaceParking place){
         if(place != null){
-            Marker m = googleMap.addMarker(new MarkerOptions()
-                    .position(place.getCoord())
-                    .icon(place.getIcone()));
-
-            placeParkingToMarker.put(place, m);
+            mClusterManager.addItem(place);
         }
-    }
-
-    private PlaceParking markerToPlaceParking(Marker marker){
-        for(PlaceParking place: listePlaces){
-            if(place.getCoord().equals(marker.getPosition())){
-                return place;
-            }
-        }
-        return null;
     }
 
     private void startUpdateTimer() {

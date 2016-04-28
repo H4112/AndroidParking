@@ -29,6 +29,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.github.TR4Android:AndroidSlidingUpPanel:3.2.1'
     compile 'com.android.support:design:23.3.0'
-    compile 'com.pavelsikun:material-seekbar-preference:0.12.1+'
-
+    compile 'com.pavelsikun:material-seekbar-preference:0.12.1'
+    compile 'com.google.maps.android:android-maps-utils:0.4.3'
 }

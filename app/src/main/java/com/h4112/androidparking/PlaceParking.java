@@ -1,16 +1,19 @@
 package com.h4112.androidparking;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.ColorInt;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
-public class PlaceParking implements Parcelable {
+public class PlaceParking implements Parcelable, ClusterItem {
     protected PlaceParking(Parcel in) {
         id = in.readInt();
         idRue = in.readInt();
@@ -47,6 +50,11 @@ public class PlaceParking implements Parcelable {
         dest.writeString(address);
     }
 
+    @Override
+    public LatLng getPosition() {
+        return new LatLng(latitude, longitude);
+    }
+
     public enum Etat { LIBRE, OCCUPEE, EN_MOUVEMENT }
 
     private int id;
@@ -56,6 +64,7 @@ public class PlaceParking implements Parcelable {
     private float longitude;
     private long derniereMaj;
     private String address;
+    private int color;
 
     private BitmapDescriptor icone;
 
@@ -70,15 +79,18 @@ public class PlaceParking implements Parcelable {
         updateIcone();
     }
 
-    public void updateIcone(){
+    private void updateIcone(){
         if(this.etat == Etat.LIBRE){
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_libre);
+            color = Color.rgb(2, 224, 23);
         }
         else if(this.etat == Etat.OCCUPEE){
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_occupee);
+            color = Color.rgb(255, 2, 2);
         }
         else{
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_en_mouvement);
+            color = Color.rgb(236, 194, 2);
         }
     }
 
@@ -142,6 +154,10 @@ public class PlaceParking implements Parcelable {
         return this.icone;
     }
 
+    public int getColor() {
+        return color;
+    }
+
     public float getLatitude(){
         return this.latitude;
     }
@@ -152,16 +168,6 @@ public class PlaceParking implements Parcelable {
 
     public int getId() {
         return id;
-    }
-
-    public PlaceParking(int id, int idRue, Etat etat, float latitude, float longitude, long derniereMaj, BitmapDescriptor icone) {
-        this.id = id;
-        this.idRue = idRue;
-        this.etat = etat;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.derniereMaj = derniereMaj;
-        this.icone = icone;
     }
 
     @Override
