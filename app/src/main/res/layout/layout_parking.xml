@@ -63,7 +63,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/access_time"
+                        android:text="@string/distance"
                         android:id="@+id/textView5"
                         android:layout_column="0"
                         android:layout_marginRight="20dp" />
@@ -72,7 +72,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:id="@+id/textView6"
+                        android:id="@+id/distance"
                         android:layout_column="1"
                         android:layout_marginBottom="10dp" />
 

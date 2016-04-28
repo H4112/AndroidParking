@@ -47,6 +47,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView etat;
     private TextView tempsLibreOccupee;
     private TextView tempsLibreOccupeeTexte;
+    private TextView distance;
     private SlidingUpPanelLayout panelLayout;
     private DrawerLayout drawer;
     private FloatingActionButton itinerary;
@@ -148,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         etat = (TextView)findViewById(R.id.etat);
         tempsLibreOccupee = (TextView)findViewById(R.id.tempsLibreOccupee);
         tempsLibreOccupeeTexte = (TextView)findViewById(R.id.texteTempsLibreOccupee);
+        distance = (TextView)findViewById(R.id.distance);
 
         setScrollablePanelInvisible();
     }
@@ -210,10 +213,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void setListePlaces(ArrayList<PlaceParking> parkingList){
         listePlaces = parkingList;
-        for(PlaceParking p : parkingList) {
-            String address = getCompleteAddressString(p.getLatitude(), p.getLongitude());
-            p.setAddress(address);
-        }
 
         displayAllParkingSpots(listePlaces);
 
@@ -593,7 +592,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .position(marker.getPosition());
         markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
         selectedPark = markerToPlaceParking(marker);
+
         updateParkingData();
+
+        boolean occupe = (selectedPark != null ? selectedPark.getEtat() : null) == PlaceParking.Etat.OCCUPEE;
+        itinerary.setVisibility(occupe ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void updateParkingData(){
@@ -608,6 +611,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 tempsLibreOccupeeTexte.setText(R.string.busy_since);
             }
             tempsLibreOccupee.setText(selectedPark.getDurationString(this));
+
+            double dist = (int) selectedPark.getDistanceFromPoint(new LatLng(myLocation.latitude, myLocation.longitude));
+
+            if(dist > 1000) {
+                distance.setText(getString(R.string.kilometers, new DecimalFormat("0.0").format(dist/1000)));
+            } else {
+                distance.setText(getString(R.string.meters, (int) (Math.round(dist / 10) * 10)));
+            }
         }
         else{
             Log.d("MainActivity", "Aucune place selectionnée");
@@ -717,32 +728,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void runUpdatePlaces() {
         FetchParkingSpotsTask task = new FetchParkingSpotsTask(this);
         task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, 100));
-    }
-
-    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
-        String strAdd = "";
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
-            if (addresses != null) {
-                Address returnedAddress = addresses.get(0);
-                StringBuilder strReturnedAddress = new StringBuilder("");
-
-                for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
-                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append(", ");
-                }
-                strAdd = strReturnedAddress.toString();
-                strAdd = strAdd.substring(0, strAdd.length() - 2);
-                Log.v("MainActivity", "Geotagged " + strAdd.toString());
-            } else {
-                Log.v("MainActivity", "No Address returned!");
-                return getString(R.string.parking_spot);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.v("MainActivity", "Could not get Address!");
-            return getString(R.string.parking_spot);
-        }
-        return strAdd;
     }
 }

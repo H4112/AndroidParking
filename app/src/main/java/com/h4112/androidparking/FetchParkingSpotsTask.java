@@ -1,7 +1,11 @@
 package com.h4112.androidparking;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,6 +16,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Permet de récupérer la liste des places de parking dans un rayon donné.
@@ -19,6 +27,8 @@ import java.util.ArrayList;
 public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Params,
         Void, ArrayList<PlaceParking>> {
     private MainActivity activity;
+
+    private static Map<LatLng, String > addressCache = new HashMap<>();
 
     public FetchParkingSpotsTask(MainActivity activity) {
         super();
@@ -77,6 +87,11 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             return null;
         }
 
+        for(PlaceParking p : placesParking) {
+            String address = getCompleteAddressString(p.getLatitude(), p.getLongitude());
+            p.setAddress(address);
+        }
+
         return placesParking;
     }
 
@@ -108,6 +123,41 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             this.longitude = longitude;
             this.radius = radius;
         }
+    }
+
+    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        LatLng pos = new LatLng(LATITUDE, LONGITUDE);
+        if(addressCache.containsKey(pos)) {
+            return addressCache.get(pos);
+        }
+
+        String strAdd;
+        Geocoder geocoder = new Geocoder(activity, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append(", ");
+                }
+                strAdd = strReturnedAddress.toString();
+                strAdd = strAdd.substring(0, strAdd.length() - 2);
+                Log.v("MainActivity", "Geotagged " + strAdd);
+
+            } else {
+                Log.v("MainActivity", "No Address returned!");
+                return activity.getString(R.string.parking_spot);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.v("MainActivity", "Could not get Address!");
+            return activity.getString(R.string.parking_spot);
+        }
+
+        addressCache.put(pos, strAdd);
+        return strAdd;
     }
 }
 
