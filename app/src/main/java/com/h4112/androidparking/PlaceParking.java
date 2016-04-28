@@ -174,6 +174,10 @@ public class PlaceParking implements Parcelable {
         return this.longitude;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public PlaceParking(int id, int idRue, Etat etat, float latitude, float longitude, long derniereMaj, BitmapDescriptor icone) {
         this.id = id;
         this.idRue = idRue;

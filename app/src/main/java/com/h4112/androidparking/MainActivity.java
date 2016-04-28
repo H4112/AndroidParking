@@ -64,10 +64,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
 
     private boolean mapViewInitialized = false;
-    private boolean isParkingSelected = false;
     private LatLng myLocation = null;
     private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
-    private PlaceParking selectedPark;
+    private Map<PlaceParking, Marker> placeParkingToMarker = new HashMap<>();
+    private PlaceParking selectedPark = null;
 
     private Handler handler = new Handler();
     private Runnable update = null;
@@ -389,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                isParkingSelected = false;
+                selectedPark = null;
                 if (markerSelectedPark != null) {
                     markerSelectedPark.remove();
                 }
@@ -403,7 +403,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(markerSelectedPark!=null){
             markerSelectedPark.remove();
         }
-        isParkingSelected = true;
         /*CameraUpdate markerLocation = CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15);
         googleMap.animateCamera(markerLocation);*/
         MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
@@ -413,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         updateParkingData();
     }
 
-    public void updateParkingData(){
+    private void updateParkingData(){
         setScrollablePanelVisible();
         if(selectedPark != null){
             adresse.setText(selectedPark.getAddress());
@@ -431,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void resetParkingData(){
+    private void resetParkingData(){
         setScrollablePanelInvisible();
         if(selectedPark == null){
             adresse.setText("...");
@@ -441,7 +440,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void setScrollablePanelVisible(){
+    private void setScrollablePanelVisible(){
         for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
             View view = scrollablePanel.getChildAt(i);
             view.setVisibility(View.VISIBLE);
@@ -450,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         itinerary.setVisibility(View.VISIBLE);
     }
 
-    public void setScrollablePanelInvisible(){
+    private void setScrollablePanelInvisible(){
         for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
             View view = scrollablePanel.getChildAt(i);
             view.setVisibility(View.INVISIBLE);
@@ -480,9 +479,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
 
             case R.id.action_find_place:
-                //Selectionner la meilleure place
-                isParkingSelected = ! isParkingSelected;
-                if(isParkingSelected) {
+                boolean isParkingSelected = selectedPark != null;
+                if(!isParkingSelected) {
                     item.setIcon(R.drawable.ic_full_star);
                     googleMap.clear();
                     selectedPark = findBestPlace();
@@ -585,19 +583,41 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void displayAllParkingSpots(List<PlaceParking> listPark){
         googleMap.clear();
+        placeParkingToMarker.clear();
 
         for(PlaceParking place : listPark){
             displayPark(place);
+        }
+
+        if(selectedPark != null) {
+            boolean found = false;
+
+            for(PlaceParking p : listePlaces) {
+                if(p.getId() == selectedPark.getId()) {
+                    Log.v("MainActivity", "Auto-Selected parking spot");
+                    actionMarkerClick(placeParkingToMarker.get(p));
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found) {
+                Log.i("MainActivity", "Selected park not found: Unselecting");
+                selectedPark = null;
+                resetParkingData();
+            }
         }
     }
 
     private void displayPark(PlaceParking place){
         if(place != null){
-            googleMap.addMarker(new MarkerOptions()
+            Marker m = googleMap.addMarker(new MarkerOptions()
                     .position(place.getCoord())
                     .title(place.getAddress())
                     .snippet(place.getEtatString(this))
                     .icon(place.getIcone()));
+
+            placeParkingToMarker.put(place, m);
         }
     }
 
@@ -652,7 +672,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             update = new Runnable() {
                 @Override
                 public void run() {
-                    if (myLocation != null && !isParkingSelected) {
+                    if (myLocation != null) {
                         runUpdatePlaces();
                         startUpdateTimer(10000);
                     } else {
