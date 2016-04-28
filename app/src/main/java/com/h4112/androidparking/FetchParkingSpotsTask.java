@@ -28,8 +28,6 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         Void, ArrayList<PlaceParking>> {
     private MainActivity activity;
 
-    private static Map<LatLng, String > addressCache = new HashMap<>();
-
     public FetchParkingSpotsTask(MainActivity activity) {
         super();
         this.activity = activity;
@@ -87,11 +85,6 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             return null;
         }
 
-        for(PlaceParking p : placesParking) {
-            String address = getCompleteAddressString(p.getLatitude(), p.getLongitude());
-            p.setAddress(address);
-        }
-
         return placesParking;
     }
 
@@ -109,6 +102,24 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         if(places == null) {
             activity.listePlacesFailure();
         } else {
+            ArrayList<PlaceParking> toGeotag = new ArrayList<>(places);
+            for(PlaceParking placeParking : places) {
+                String cached = GeocodingTask.getAddressFromCache(placeParking);
+                if(cached != null) {
+                    placeParking.setAddress(cached);
+                    toGeotag.remove(placeParking);
+                } else {
+                    placeParking.setAddress(activity.getString(R.string.parking_spot));
+                }
+            }
+
+            if(!toGeotag.isEmpty()) {
+                GeocodingTask task = new GeocodingTask(activity);
+                PlaceParking[] parkArray = new PlaceParking[toGeotag.size()];
+                toGeotag.toArray(parkArray);
+                task.execute(parkArray);
+            }
+
             activity.setListePlaces(places);
         }
     }
@@ -125,39 +136,5 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         }
     }
 
-    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
-        LatLng pos = new LatLng(LATITUDE, LONGITUDE);
-        if(addressCache.containsKey(pos)) {
-            return addressCache.get(pos);
-        }
-
-        String strAdd;
-        Geocoder geocoder = new Geocoder(activity, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
-            if (addresses != null) {
-                Address returnedAddress = addresses.get(0);
-                StringBuilder strReturnedAddress = new StringBuilder("");
-
-                for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
-                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append(", ");
-                }
-                strAdd = strReturnedAddress.toString();
-                strAdd = strAdd.substring(0, strAdd.length() - 2);
-                Log.v("MainActivity", "Geotagged " + strAdd);
-
-            } else {
-                Log.v("MainActivity", "No Address returned!");
-                return activity.getString(R.string.parking_spot);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.v("MainActivity", "Could not get Address!");
-            return activity.getString(R.string.parking_spot);
-        }
-
-        addressCache.put(pos, strAdd);
-        return strAdd;
-    }
 }
 

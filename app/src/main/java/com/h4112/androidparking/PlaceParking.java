@@ -179,6 +179,8 @@ public class PlaceParking implements Parcelable, ClusterItem {
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", derniereMaj=" + derniereMaj +
+                ", address='" + address + '\'' +
+                ", color=" + color +
                 ", icone=" + icone +
                 '}';
     }

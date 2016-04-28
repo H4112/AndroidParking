@@ -4,8 +4,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -52,7 +50,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -60,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleApiClient.OnConnectionFailedListener, LocationListener  {
     private static final int UPDATE_INTERVAL = 10000;
     private static final int FASTEST_UPDATE_INTERVAL = 5000;
+
+    private static final int PARKING_UPDATE_INTERVAL = 5000;
 
     private static final int ITEM_PARAMETRES = 0;
     private static final int ITEM_GARE = 1;
@@ -96,7 +95,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SlidingUpPanelLayout panelLayout;
     private DrawerLayout drawer;
     private FloatingActionButton itinerary;
-    ClusterManager<PlaceParking> mClusterManager;
+    private ClusterManager<PlaceParking> mClusterManager;
+
+    private FetchParkingSpotsTask task;
 
     private Marker markerSelectedPark;
 
@@ -698,19 +699,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void startUpdateTimer(int delay) {
         Log.d("MainActivity", "Update timer STARTED! Delay "+delay);
 
-            update = new Runnable() {
-                @Override
-                public void run() {
-                    if (myLocation != null) {
-                        runUpdatePlaces();
-                        startUpdateTimer(10000);
-                    } else {
-                        Log.d("MainActivity", "myLocation = null, timer stopped");
-                    }
+        update = new Runnable() {
+            @Override
+            public void run() {
+                if (myLocation != null) {
+                    runUpdatePlaces();
+                    startUpdateTimer(PARKING_UPDATE_INTERVAL);
+                } else {
+                    Log.d("MainActivity", "myLocation = null, timer stopped");
                 }
-            };
+            }
+        };
 
-            handler.postDelayed(update, delay);
+        handler.postDelayed(update, delay);
     }
 
     private void stopUpdateTimer() {
@@ -722,7 +723,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void runUpdatePlaces() {
-        FetchParkingSpotsTask task = new FetchParkingSpotsTask(this);
+        if(task != null) task.cancel(true);
+
+        task = new FetchParkingSpotsTask(this);
         task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, 100));
     }
 }
