@@ -123,41 +123,17 @@ public class PlaceParking implements Parcelable {
         }
     }
 
-    public String getEtatString(Context c) {
+    public String getDurationString(Context c) {
         int hours = this.getDureeEtatActuelMin() / 60;
         int mins = this.getDureeEtatActuelMin() % 60;
 
         String infos;
-        if(this.getEtat()==PlaceParking.Etat.OCCUPEE){
-            if(hours == 0) {
-                infos = c.getString(R.string.place_occupee_min, mins + "");
-            } else {
-                infos = c.getString(R.string.place_occupee_h, hours + "", mins + "");
-            }
-        } else if(this.getEtat()== PlaceParking.Etat.LIBRE){
-            if(hours == 0) {
-                infos = c.getString(R.string.place_libre_min, mins + "");
-            } else {
-                infos = c.getString(R.string.place_libre_h, hours + "", mins + "");
-            }
-        } else if(getDureeEtatActuelMin() < 5) {
-            infos = c.getString(R.string.place_en_mouvement);
+        if(mins == 0 && hours == 0) {
+            infos = c.getString(R.string.time_now);
+        } else if(hours == 0) {
+            infos = c.getString(R.string.time_m, ""+mins);
         } else {
-            infos = c.getString(R.string.place_en_mouvement_depuis_longtemps);
-        }
-
-        return infos;
-    }
-
-    public String getDurationString() {
-        int hours = this.getDureeEtatActuelMin() / 60;
-        int mins = this.getDureeEtatActuelMin() % 60;
-
-        String infos;
-        if(hours == 0) {
-            infos = Integer.toString(mins)+" min";
-        } else {
-            infos = Integer.toString(hours)+" h et "+Integer.toString(mins)+" min";
+            infos = c.getString(R.string.time_h, ""+hours, ""+mins);
         }
         return infos;
     }

@@ -485,12 +485,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             adresse.setText(selectedPark.getAddress());
             etat.setText(selectedPark.getEtatString());
             if(selectedPark.getEtat() != PlaceParking.Etat.OCCUPEE) {
-                tempsLibreOccupeeTexte.setText("Libre depuis");
+                tempsLibreOccupeeTexte.setText(R.string.free_since);
             }
             else if(selectedPark.getEtat() == PlaceParking.Etat.OCCUPEE) {
-                tempsLibreOccupee.setText("Occupée depuis");
+                tempsLibreOccupeeTexte.setText(R.string.busy_since);
             }
-            tempsLibreOccupee.setText(selectedPark.getDurationString());
+            tempsLibreOccupee.setText(selectedPark.getDurationString(this));
         }
         else{
             Log.d("MainActivity", "Aucune place selectionnée");
@@ -665,8 +665,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(place != null){
             Marker m = googleMap.addMarker(new MarkerOptions()
                     .position(place.getCoord())
-                    .title(place.getAddress())
-                    .snippet(place.getEtatString(this))
                     .icon(place.getIcone()));
 
             placeParkingToMarker.put(place, m);
@@ -686,8 +684,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(place != null){
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(place.getCoord())
-                    .title(place.getAddress())
-                    .snippet(place.getEtatString(this))
                     .icon(place.getIcone());
             Marker marker = googleMap.addMarker(markerOptions);
             marker.showInfoWindow();

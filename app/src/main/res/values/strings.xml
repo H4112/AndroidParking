@@ -12,8 +12,8 @@
     <string name="type_parking_titre">Type de places</string>
     <string name="type_place_titre">Type de parking</string>
 
-    <string name="parkingPrives">Parking privés</string>
-    <string name="parkingPublics">Parking publics</string>
+    <string name="parkingPrives">Parkings privés</string>
+    <string name="parkingPublics">Parkings publics</string>
     <string name="placesLibres">Places libres</string>
     <string name="placesOccupées">Places occupées</string>
     <string name="placesEnCoursLiberation">Places sur le point de se libérer</string>
@@ -33,12 +33,18 @@
 
     <string name="place_en_mouvement">Place bientôt libérée</string>
     <string name="place_en_mouvement_depuis_longtemps">État inconnu</string>
-    <string name="place_occupee_min">"Place occupée depuis %1$s min"</string>
-    <string name="place_libre_min">"Place libre depuis %1$s min"</string>
 
-    <string name="place_occupee_h">"Place occupée depuis %1$s h et %2$s min"</string>
-    <string name="place_libre_h">"Place libre depuis %1$s h et %2$s min"</string>
+    <string name="time_h">"%1$s h et %2$s min"</string>
+    <string name="time_m">"%1$s min"</string>
+    <string name="time_now">"Quelques instants"</string>
+
     <string name="afficherPlacesPortee">Afficher les places dans un rayon de</string>
     <string name="parking_spot">Place de parking</string>
+    <string name="access_time">Temps d\'accès</string>
+    <string name="parking">Parking</string>
+    <string name="public_spot">Public</string>
+    <string name="private_spot">Privé</string>
+    <string name="free_since">Libre depuis</string>
+    <string name="busy_since">Occupée depuis</string>
 
 </resources>
