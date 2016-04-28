@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.ColorInt;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -54,8 +53,7 @@ public class PlaceParking implements Parcelable, ClusterItem {
     public LatLng getPosition() {
         return new LatLng(latitude, longitude);
     }
-
-    public enum Etat { LIBRE, OCCUPEE, EN_MOUVEMENT }
+    public enum Etat { LIBRE, OCCUPEE, EN_MOUVEMENT, INCONNU }
 
     private int id;
     private int idRue;
@@ -87,10 +85,12 @@ public class PlaceParking implements Parcelable, ClusterItem {
         else if(this.etat == Etat.OCCUPEE){
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_occupee);
             color = Color.rgb(255, 2, 2);
-        }
-        else{
+        }else if(this.etat == Etat.EN_MOUVEMENT){
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_en_mouvement);
             color = Color.rgb(236, 194, 2);
+        }else{
+            icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_inconnu);
+            color = Color.rgb(64, 64, 64);
         }
     }
 
@@ -120,18 +120,18 @@ public class PlaceParking implements Parcelable, ClusterItem {
         return this.etat;
     }
 
-    public String getEtatString(){
+    public String getEtatString(Context c){
         if(this.getEtat() == Etat.LIBRE){
-            return "Place Libre";
+            return c.getString(R.string.free_spot);
         }
         else if(this.getEtat() == Etat.OCCUPEE){
-            return "Place Occupée";
+            return c.getString(R.string.busy_spot);
         }
         else if(this.getEtat() == Etat.EN_MOUVEMENT){
-            return "Place Bientôt Libre";
+            return c.getString(R.string.moving_spot);
         }
         else{
-            return "Place Indéterminée";
+            return c.getString(R.string.unknown_spot);
         }
     }
 
@@ -185,6 +185,22 @@ public class PlaceParking implements Parcelable, ClusterItem {
                 '}';
     }
 
+    public String toCacheCSV() {
+        return id+";"+idRue+";"+latitude+";"+longitude+";"+address;
+    }
+
+    public static PlaceParking fromCacheCSV(String csv) {
+        String[] split = csv.split(";");
+
+        return new PlaceParking(
+                Integer.parseInt(split[0]),
+                Etat.INCONNU,
+                Float.parseFloat(split[2]),
+                Float.parseFloat(split[3]),
+                Integer.parseInt(split[1]),
+                System.currentTimeMillis());
+    }
+
     public String getAddress() {
         return address;
     }
@@ -192,4 +208,21 @@ public class PlaceParking implements Parcelable, ClusterItem {
     public void setAddress(String address) {
         this.address = address;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PlaceParking that = (PlaceParking) o;
+
+        return id == that.id;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
 }

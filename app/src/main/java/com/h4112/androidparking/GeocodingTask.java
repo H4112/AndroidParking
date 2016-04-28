@@ -21,8 +21,8 @@ public class GeocodingTask extends AsyncTask<PlaceParking, Void, Void> {
     private static Map<LatLng, String > addressCache = new HashMap<>();
 
     public static String getAddressFromCache(PlaceParking placeParking) {
-        if(addressCache.containsKey(placeParking.getPosition())) {
-            return addressCache.get(placeParking.getPosition());
+        if(addressCache.containsKey(placeParking.getCoord())) {
+            return addressCache.get(placeParking.getCoord());
         } else {
             return null;
         }
@@ -40,7 +40,7 @@ public class GeocodingTask extends AsyncTask<PlaceParking, Void, Void> {
         Log.d("GeocodingTask", "Beginning geocoding tasks");
 
         for(PlaceParking p : params) {
-            String address = getCompleteAddressString(p.getPosition());
+            String address = getCompleteAddressString(p.getCoord());
             p.setAddress(address);
         }
 

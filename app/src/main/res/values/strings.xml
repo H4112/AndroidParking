@@ -46,7 +46,11 @@
     <string name="parking">Parking</string>
     <string name="public_spot">Public</string>
     <string name="private_spot">Privé</string>
-    <string name="free_since">Libre depuis</string>
-    <string name="busy_since">Occupée depuis</string>
+    <string name="since">Depuis</string>
+
+    <string name="free_spot">Place libre</string>
+    <string name="busy_spot">Place occupée</string>
+    <string name="moving_spot">Place bientôt libre</string>
+    <string name="unknown_spot">État inconnu</string>
 
 </resources>

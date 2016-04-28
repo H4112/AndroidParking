@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng myLocation = null;
     private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
     private PlaceParking selectedPark = null;
+    private AlertDialog failDialog = null;
 
     private Handler handler = new Handler();
     private Runnable update = null;
@@ -90,7 +91,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView adresse;
     private TextView etat;
     private TextView tempsLibreOccupee;
-    private TextView tempsLibreOccupeeTexte;
     private TextView distance;
     private SlidingUpPanelLayout panelLayout;
     private DrawerLayout drawer;
@@ -151,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         adresse = (TextView)findViewById(R.id.adresse);
         etat = (TextView)findViewById(R.id.etat);
         tempsLibreOccupee = (TextView)findViewById(R.id.tempsLibreOccupee);
-        tempsLibreOccupeeTexte = (TextView)findViewById(R.id.texteTempsLibreOccupee);
         distance = (TextView)findViewById(R.id.distance);
 
         setScrollablePanelInvisible();
@@ -225,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(!gotFirstSpotList) {
             stopUpdateTimer();
 
-            new AlertDialog.Builder(this)
+            failDialog = new AlertDialog.Builder(this)
                     .setMessage(getString(R.string.error_getting_parks))
                     .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                         @Override
@@ -233,12 +232,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             startUpdateTimer();
                         }
                     })
-                    .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                        }
-                    })
+                    .setNegativeButton(getString(R.string.close), null)
                     .setCancelable(false)
                     .show();
         }
@@ -250,7 +244,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         PlaceParking bestPlace = null;
         double minDistance = findFirstDistanceFreePlace();
         for(PlaceParking place : listePlaces){
-            if(place.getDistanceFromPoint(myLocation) <= minDistance && place.getEtat()!=PlaceParking.Etat.OCCUPEE) {
+            if(place.getDistanceFromPoint(myLocation) <= minDistance && place.getEtat()!=PlaceParking.Etat.OCCUPEE
+                    && place.getEtat()!=PlaceParking.Etat.INCONNU) {
                 bestPlace = place;
                 minDistance = place.getDistanceFromPoint(myLocation);
             }
@@ -260,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private double findFirstDistanceFreePlace(){
         for(PlaceParking place : listePlaces){
-            if(place.getEtat()!=PlaceParking.Etat.OCCUPEE) {
+            if(place.getEtat()!=PlaceParking.Etat.OCCUPEE && place.getEtat()!=PlaceParking.Etat.INCONNU) {
                 return place.getDistanceFromPoint(myLocation);
             }
         }
@@ -421,6 +416,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onStop();
 
         stopUpdateTimer();
+        if(failDialog != null) failDialog.dismiss();
     }
 
     @Override
@@ -598,7 +594,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             markerSelectedPark.remove();
         }
         MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
-                .position(placeParking.getPosition());
+                .position(placeParking.getCoord());
         markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
         selectedPark = placeParking;
 
@@ -612,13 +608,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setScrollablePanelVisible();
         if(selectedPark != null){
             adresse.setText(selectedPark.getAddress());
-            etat.setText(selectedPark.getEtatString());
-            if(selectedPark.getEtat() != PlaceParking.Etat.OCCUPEE) {
-                tempsLibreOccupeeTexte.setText(R.string.free_since);
-            }
-            else if(selectedPark.getEtat() == PlaceParking.Etat.OCCUPEE) {
-                tempsLibreOccupeeTexte.setText(R.string.busy_since);
-            }
+            etat.setText(selectedPark.getEtatString(this));
             tempsLibreOccupee.setText(selectedPark.getDurationString(this));
 
             double dist = (int) selectedPark.getDistanceFromPoint(new LatLng(myLocation.latitude, myLocation.longitude));
@@ -659,8 +649,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void displayAllParkingSpots(List<PlaceParking> listPark){
-        googleMap.clear();
         mClusterManager.clearItems();
+        if(markerSelectedPark != null) markerSelectedPark.remove();
 
         for(PlaceParking place : listPark){
             displayPark(place);
@@ -697,6 +687,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void startUpdateTimer(int delay) {
+        if(update != null) {
+            handler.removeCallbacks(update);
+        }
+
         Log.d("MainActivity", "Update timer STARTED! Delay "+delay);
 
         update = new Runnable() {
@@ -726,6 +720,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(task != null) task.cancel(true);
 
         task = new FetchParkingSpotsTask(this);
-        task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, 100));
+        task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, 1000));
     }
 }
