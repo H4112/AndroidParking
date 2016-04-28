@@ -469,12 +469,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void actionMarkerClick(Marker marker){
-        //marker.showInfoWindow();
         if(markerSelectedPark!=null){
             markerSelectedPark.remove();
         }
-        /*CameraUpdate markerLocation = CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15);
-        googleMap.animateCamera(markerLocation);*/
         MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
                 .position(marker.getPosition());
         markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
@@ -529,7 +526,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-
             case R.id.action_search:
                 searchview.setIconified(false);
                 if(searchview.getVisibility() == View.VISIBLE) {
@@ -542,21 +538,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
 
             case R.id.action_find_place:
-                boolean isParkingSelected = selectedPark != null;
-                if(!isParkingSelected) {
-                    item.setIcon(R.drawable.ic_full_star);
-                    googleMap.clear();
-                    selectedPark = findBestPlace();
-                    displayAndSeletPark(selectedPark);
-                    updateParkingData();
+                if(markerSelectedPark!=null){
+                    markerSelectedPark.remove();
                 }
-                else{
-                    selectedPark = null;
-                    item.setIcon(R.drawable.ic_star_rate_white_18pt_2x);
-                    googleMap.clear();
-                    displayAllParkingSpots(listePlaces);
-                    resetParkingData();
-                }
+                selectedPark = findBestPlace();
+                MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
+                        .position(selectedPark.getCoord());
+                markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
+                updateParkingData();
                 return true;
 
             default:
