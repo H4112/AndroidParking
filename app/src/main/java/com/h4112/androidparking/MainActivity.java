@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -26,7 +27,6 @@ import android.view.View;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -92,8 +92,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView tempsLibreOccupee;
     private TextView tempsLibreOccupeeTexte;
     private SlidingUpPanelLayout panelLayout;
-
-    private RelativeLayout scrollablePanel;
+    private DrawerLayout drawer;
     private FloatingActionButton itinerary;
 
     private Marker markerSelectedPark;
@@ -150,8 +149,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         tempsLibreOccupee = (TextView)findViewById(R.id.tempsLibreOccupee);
         tempsLibreOccupeeTexte = (TextView)findViewById(R.id.texteTempsLibreOccupee);
 
-        scrollablePanel = (RelativeLayout) findViewById(R.id.scrollablePanel);
-
         setScrollablePanelInvisible();
     }
 
@@ -172,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         final AlertDialog popup = new AlertDialog.Builder(this)
                 .setMessage("Voulez-vous lancer la navigation ?")
-                .setPositiveButton("Oui(5)", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Oui (5)", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         launchNavigation();
@@ -185,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         new CountDownTimer(6000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                popup.getButton(DialogInterface.BUTTON_POSITIVE).setText("Oui("+(millisUntilFinished/1000)+")");
+                popup.getButton(DialogInterface.BUTTON_POSITIVE).setText("Oui ("+(millisUntilFinished/1000)+")");
             }
 
             @Override
@@ -400,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
                 this, drawer, R.string.nav_drawer_open, R.string.nav_drawer_closed);
         if (drawer != null) {
@@ -423,6 +420,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onStop();
 
         stopUpdateTimer();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else if(panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
+                ||panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED) {
+            panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        } else if(panelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.HIDDEN) {
+            resetParkingData();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -569,10 +580,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                selectedPark = null;
-                if (markerSelectedPark != null) {
-                    markerSelectedPark.remove();
-                }
                 resetParkingData();
             }
         });
@@ -608,13 +615,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void resetParkingData(){
-        setScrollablePanelInvisible();
-        if(selectedPark == null){
-            adresse.setText("...");
-            etat.setText("Place ...");
-            tempsLibreOccupeeTexte.setText("...");
-            tempsLibreOccupee.setText("...");
+        selectedPark = null;
+        if (markerSelectedPark != null) {
+            markerSelectedPark.remove();
         }
+        setScrollablePanelInvisible();
     }
 
     private void setScrollablePanelVisible(){
@@ -655,7 +660,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             if(!found) {
                 Log.i("MainActivity", "Selected park not found: Unselecting");
-                selectedPark = null;
                 resetParkingData();
             }
         }
