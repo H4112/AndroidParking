@@ -8,6 +8,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -159,8 +160,41 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void navigationButtonClicked() {
-        Log.w("MainActivity", "From " + Double.toString(myLocation.latitude) + ", " + Double.toString(myLocation.longitude) + " to " +
+        Log.d("MainActivity", "From " + Double.toString(myLocation.latitude) + ", " + Double.toString(myLocation.longitude) + " to " +
                 Float.toString(selectedPark.getLatitude()) + ", " + Float.toString(selectedPark.getLongitude()));
+
+        final AlertDialog popup = new AlertDialog.Builder(this)
+                .setMessage("Voulez-vous lancer la navigation ?")
+                .setPositiveButton("Oui(5)", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        launchNavigation();
+                    }
+                })
+                .setNegativeButton("Non", null)
+                .setTitle("Votre place a été réservée")
+                .show();
+
+        new CountDownTimer(6000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                popup.getButton(DialogInterface.BUTTON_POSITIVE).setText("Oui("+(millisUntilFinished/1000)+")");
+            }
+
+            @Override
+            public void onFinish() {
+                if(popup.isShowing()) {
+                    launchNavigation();
+                    popup.dismiss();
+                }
+            }
+        }.start();
+
+    }
+
+    public void launchNavigation(){
+        //TODO
+        Log.d("MainActivity", "--- Lancement de la navigation ---");
     }
 
     public void setListePlaces(ArrayList<PlaceParking> parkingList){
