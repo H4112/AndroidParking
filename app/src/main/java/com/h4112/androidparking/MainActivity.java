@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Interpolator;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -43,6 +44,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView etat;
     private TextView tempsLibreOccupee;
     private TextView tempsLibreOccupeeTexte;
+    private SlidingUpPanelLayout panelLayout;
 
     private RelativeLayout scrollablePanel;
     private FloatingActionButton itinerary;
@@ -117,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         initPlayServices();
         initDrawer();
         initDrawerList();
+        initSlidingUpPanel();
 
         searchview = (SearchView) findViewById(R.id.search);
         if (searchview != null) {
@@ -315,6 +319,64 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void initSlidingUpPanel() {
+        panelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+
+        if(panelLayout != null) {
+            panelLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+                @Override
+                public void onPanelSlide(View view, float v) {
+
+                }
+
+                @Override
+                public void onPanelCollapsed(View view) {
+                    adresse.setSingleLine(true);
+                }
+
+                @Override
+                public void onPanelExpanded(View view) {
+                    adresse.setSingleLine(false);
+                }
+
+                @Override
+                public void onPanelAnchored(View view) {
+                    adresse.setSingleLine(false);
+                }
+
+                @Override
+                public void onPanelHidden(View view) {
+
+                }
+
+                @Override
+                public void onPanelHiddenExecuted(View view, Interpolator interpolator, int i) {
+
+                }
+
+                @Override
+                public void onPanelShownExecuted(View view, Interpolator interpolator, int i) {
+
+                }
+
+                @Override
+                public void onPanelExpandedStateY(View view, boolean b) {
+
+                }
+
+                @Override
+                public void onPanelCollapsedStateY(View view, boolean b) {
+
+                }
+
+                @Override
+                public void onPanelLayout(View view, SlidingUpPanelLayout.PanelState panelState) {
+
+                }
+            });
+        }
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -441,21 +503,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void setScrollablePanelVisible(){
-        for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
-            View view = scrollablePanel.getChildAt(i);
-            view.setVisibility(View.VISIBLE);
-        }
-        //scrollablePanel.setVisibility(View.VISIBLE);
         itinerary.setVisibility(View.VISIBLE);
+        if(panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN)
+            panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
     private void setScrollablePanelInvisible(){
-        for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
-            View view = scrollablePanel.getChildAt(i);
-            view.setVisibility(View.INVISIBLE);
-        }
-        //scrollablePanel.setVisibility(View.INVISIBLE);
         itinerary.setVisibility(View.INVISIBLE);
+        panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

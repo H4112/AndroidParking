@@ -6,75 +6,55 @@
     android:layout_height="fill_parent"
     android:id="@+id/scrollablePanel">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="frfgnbiuofghfuightiodghnsrtuodghstuohbrtsfuobtsgfuoghuiosrtgdu"
+        android:id="@+id/adresse"
+        android:layout_column="0"
+        android:fontFamily="sans-serif-light"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="82dp"
+        android:singleLine="true" />
+
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="5dp">
+        android:layout_height="wrap_content"
+        android:id="@+id/tableLayout"
+        android:layout_below="@+id/etat"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="82dp"
+        android:layout_alignLeft="@+id/etat"
+        android:layout_alignStart="@+id/etat">
 
         <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:text="Place ..."
-                        android:id="@+id/etat"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"
-                        android:layout_column="0" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="Adresse"
-                        android:id="@+id/textView"
-                        android:layout_column="0" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="..."
-                        android:id="@+id/adresse"
-                        android:layout_column="1" />
-
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="..."
                         android:id="@+id/texteTempsLibreOccupee"
-                        android:layout_column="0" />
+                        android:layout_column="0"
+                        android:layout_marginRight="20dp" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="..."
                         android:id="@+id/tempsLibreOccupee"
-                        android:layout_column="1" />
+                        android:layout_column="1"
+                        android:layout_marginBottom="10dp" />
 
                 </TableRow>
 
@@ -83,20 +63,22 @@
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="Temps d&apos;accès"
                         android:id="@+id/textView5"
-                        android:layout_column="0" />
+                        android:layout_column="0"
+                        android:layout_marginRight="20dp" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="2 min"
                         android:id="@+id/textView6"
-                        android:layout_column="1" />
+                        android:layout_column="1"
+                        android:layout_marginBottom="10dp" />
 
                 </TableRow>
 
@@ -105,44 +87,53 @@
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="Parking"
                         android:id="@+id/textView7"
-                        android:layout_column="0" />
+                        android:layout_column="0"
+                        android:layout_marginRight="20dp" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="Public"
                         android:id="@+id/textView8"
-                        android:layout_column="1" />
+                        android:layout_column="1"
+                        android:layout_marginBottom="10dp" />
 
                 </TableRow>
 
-            </TableLayout>
-        </TableRow>
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Je me gare ici !"
-                    android:id="@+id/button"
-                    android:layout_gravity="center_vertical" />
-            </LinearLayout>
-        </TableRow>
 
     </TableLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Je me gare ici !"
+        android:id="@+id/button"
+        android:layout_gravity="center_vertical"
+        android:layout_below="@+id/tableLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="5dp"
+        android:layout_marginBottom="10dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Ceci est un test de nom de rue super long"
+        android:id="@+id/etat"
+        android:layout_column="1"
+        android:layout_below="@+id/adresse"
+        android:layout_alignLeft="@+id/adresse"
+        android:layout_alignStart="@+id/adresse"
+        android:layout_marginRight="82dp"
+        android:layout_marginTop="10dp" />
 
 </RelativeLayout>

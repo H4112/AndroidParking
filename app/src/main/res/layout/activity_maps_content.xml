@@ -15,8 +15,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="bottom"
-            sothree:umanoPanelHeight="68dp"
-            sothree:umanoShadowHeight="4dp">
+            sothree:umanoPanelHeight="84dp"
+            sothree:umanoShadowHeight="4dp"
+            sothree:umanoAnchorPoint="0.5"
+            sothree:umanoParallaxOffset="200dp">
 
             <RelativeLayout
                 android:layout_width="fill_parent"
@@ -40,7 +42,7 @@
 
             </RelativeLayout>
 
-            <include layout="@layout/layout_parking"/>
+            <include layout="@layout/layout_parking" />
 
         </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
