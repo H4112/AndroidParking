@@ -19,6 +19,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,8 +42,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -565,19 +569,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         googleMap.setMyLocationEnabled(true);
 
-        mClusterManager = new ClusterManager<>(this, googleMap);
-        mClusterManager.setRenderer(new PlaceParkingClusterRenderer(this, googleMap, mClusterManager));
-
-        googleMap.setOnCameraChangeListener(mClusterManager);
-        googleMap.setOnMarkerClickListener(mClusterManager);
-
-        mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<PlaceParking>() {
-            @Override
-            public boolean onClusterItemClick(PlaceParking placeParking) {
-                actionMarkerClick(placeParking);
-                return true;
-            }
-        });
+        initClusterManager();
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -587,6 +579,54 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         displayAllParkingSpots(listePlaces);
+    }
+
+    private ClusterManager.OnClusterItemClickListener<PlaceParking> clusterItemClickListener =
+            new ClusterManager.OnClusterItemClickListener<PlaceParking>() {
+                @Override
+                public boolean onClusterItemClick(PlaceParking placeParking) {
+                    actionMarkerClick(placeParking);
+                    return true;
+                }
+            };
+
+    private ClusterManager.OnClusterClickListener<PlaceParking> clusterClickListener =
+            new ClusterManager.OnClusterClickListener<PlaceParking>() {
+                @Override
+                public boolean onClusterClick(Cluster<PlaceParking> cluster) {
+                    float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
+                    float maxX = Float.MIN_VALUE, maxY = Float.MIN_VALUE;
+
+                    for(PlaceParking p : cluster.getItems()) {
+                        if(minX > p.getLatitude()) minX = p.getLatitude();
+                        if(minY > p.getLongitude()) minY = p.getLongitude();
+                        if(maxX < p.getLatitude()) maxX = p.getLatitude();
+                        if(maxY < p.getLongitude()) maxY = p.getLongitude();
+                    }
+
+                    LatLng upperleft = new LatLng(minX, minY);
+                    LatLng lowerright = new LatLng(maxX, maxY);
+
+                    int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                            40, getResources().getDisplayMetrics());
+
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
+                            new LatLngBounds(upperleft, lowerright), px));
+
+                    return true;
+                }
+            };
+
+    private void initClusterManager() {
+        mClusterManager = new ClusterManager<>(this, googleMap);
+        mClusterManager.setRenderer(new PlaceParkingClusterRenderer(this, googleMap, mClusterManager));
+
+        googleMap.setOnCameraChangeListener(mClusterManager);
+        googleMap.setOnMarkerClickListener(mClusterManager);
+
+        mClusterManager.setOnClusterItemClickListener(clusterItemClickListener);
+        mClusterManager.setOnClusterClickListener(clusterClickListener);
+
     }
 
     public void actionMarkerClick(PlaceParking placeParking){
@@ -649,8 +689,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void displayAllParkingSpots(List<PlaceParking> listPark){
-        mClusterManager.clearItems();
-        if(markerSelectedPark != null) markerSelectedPark.remove();
+        googleMap.clear();
+
+        initClusterManager();
 
         for(PlaceParking place : listPark){
             displayPark(place);
