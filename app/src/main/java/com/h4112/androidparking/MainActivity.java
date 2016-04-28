@@ -425,104 +425,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         stopUpdateTimer();
     }
 
-    public void onMapReady(GoogleMap map) {
-        googleMap = map;
-
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
-        googleMap.getUiSettings().setMapToolbarEnabled(false);
-        googleMap.getUiSettings().setCompassEnabled(false);
-        googleMap.getUiSettings().setRotateGesturesEnabled(false);
-
-        // Généré automatiquement
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        googleMap.setMyLocationEnabled(true);
-
-        displayAllParkingSpots(listePlaces);
-
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            public boolean onMarkerClick(Marker marker) {
-                actionMarkerClick(marker);
-                return true;
-            }
-        });
-
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                selectedPark = null;
-                if (markerSelectedPark != null) {
-                    markerSelectedPark.remove();
-                }
-                resetParkingData();
-            }
-        });
-    }
-
-    public void actionMarkerClick(Marker marker){
-        if(markerSelectedPark!=null){
-            markerSelectedPark.remove();
-        }
-        MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
-                .position(marker.getPosition());
-        markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
-        selectedPark = markerToPlaceParking(marker);
-        updateParkingData();
-    }
-
-    private void updateParkingData(){
-        setScrollablePanelVisible();
-        if(selectedPark != null){
-            adresse.setText(selectedPark.getAddress());
-            etat.setText(selectedPark.getEtatString());
-            if(selectedPark.getEtat() != PlaceParking.Etat.OCCUPEE) {
-                tempsLibreOccupeeTexte.setText(R.string.free_since);
-            }
-            else if(selectedPark.getEtat() == PlaceParking.Etat.OCCUPEE) {
-                tempsLibreOccupeeTexte.setText(R.string.busy_since);
-            }
-            tempsLibreOccupee.setText(selectedPark.getDurationString(this));
-        }
-        else{
-            Log.d("MainActivity", "Aucune place selectionnée");
-        }
-    }
-
-    private void resetParkingData(){
-        setScrollablePanelInvisible();
-        if(selectedPark == null){
-            adresse.setText("...");
-            etat.setText("Place ...");
-            tempsLibreOccupeeTexte.setText("...");
-            tempsLibreOccupee.setText("...");
-        }
-    }
-
-    private void setScrollablePanelVisible(){
-        itinerary.setVisibility(View.VISIBLE);
-        if(panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN)
-            panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-    }
-
-    private void setScrollablePanelInvisible(){
-        itinerary.setVisibility(View.INVISIBLE);
-        panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -633,6 +535,104 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toast.makeText(this, R.string.unable_to_locate, Toast.LENGTH_LONG).show();
     }
 
+    public void onMapReady(GoogleMap map) {
+        googleMap = map;
+
+        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.getUiSettings().setCompassEnabled(false);
+        googleMap.getUiSettings().setRotateGesturesEnabled(false);
+
+        // Généré automatiquement
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        googleMap.setMyLocationEnabled(true);
+
+        displayAllParkingSpots(listePlaces);
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            public boolean onMarkerClick(Marker marker) {
+                actionMarkerClick(marker);
+                return true;
+            }
+        });
+
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                selectedPark = null;
+                if (markerSelectedPark != null) {
+                    markerSelectedPark.remove();
+                }
+                resetParkingData();
+            }
+        });
+    }
+
+    public void actionMarkerClick(Marker marker){
+        if(markerSelectedPark!=null){
+            markerSelectedPark.remove();
+        }
+        MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
+                .position(marker.getPosition());
+        markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
+        selectedPark = markerToPlaceParking(marker);
+        updateParkingData();
+    }
+
+    private void updateParkingData(){
+        setScrollablePanelVisible();
+        if(selectedPark != null){
+            adresse.setText(selectedPark.getAddress());
+            etat.setText(selectedPark.getEtatString());
+            if(selectedPark.getEtat() != PlaceParking.Etat.OCCUPEE) {
+                tempsLibreOccupeeTexte.setText(R.string.free_since);
+            }
+            else if(selectedPark.getEtat() == PlaceParking.Etat.OCCUPEE) {
+                tempsLibreOccupeeTexte.setText(R.string.busy_since);
+            }
+            tempsLibreOccupee.setText(selectedPark.getDurationString(this));
+        }
+        else{
+            Log.d("MainActivity", "Aucune place selectionnée");
+        }
+    }
+
+    private void resetParkingData(){
+        setScrollablePanelInvisible();
+        if(selectedPark == null){
+            adresse.setText("...");
+            etat.setText("Place ...");
+            tempsLibreOccupeeTexte.setText("...");
+            tempsLibreOccupee.setText("...");
+        }
+    }
+
+    private void setScrollablePanelVisible(){
+        itinerary.setVisibility(View.VISIBLE);
+        if(panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN)
+            panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    }
+
+    private void setScrollablePanelInvisible(){
+        itinerary.setVisibility(View.INVISIBLE);
+        panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
     private void displayAllParkingSpots(List<PlaceParking> listPark){
         googleMap.clear();
         placeParkingToMarker.clear();
@@ -678,36 +678,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
         return null;
-    }
-
-    private void displayAndSeletPark(PlaceParking place){
-        if(place != null){
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .position(place.getCoord())
-                    .icon(place.getIcone());
-            Marker marker = googleMap.addMarker(markerOptions);
-            marker.showInfoWindow();
-
-        }
-    }
-
-    // Pour déterminer le chemin à prendre
-    private String getUrl(LatLng src, LatLng dest){
-
-        String urlString = "";
-
-        urlString+=("http://maps.google.com/maps?f=d&hl=en");
-        urlString+=("&saddr=");
-        urlString+=(Double.toString((double) src.latitude));
-        urlString+=(",");
-        urlString+=(Double.toString((double) src.longitude));
-        urlString+=("&daddr=");// to
-        urlString+=(Double.toString((double) dest.latitude));
-        urlString+=(",");
-        urlString+=(Double.toString((double) dest.longitude));
-        urlString+=("&ie=UTF8&0&om=0&output=kml");
-
-        return urlString;
     }
 
     private void startUpdateTimer() {
