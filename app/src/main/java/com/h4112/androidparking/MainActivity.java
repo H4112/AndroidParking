@@ -354,14 +354,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                isParkingSelected = false;
                 resetParkingData();
             }
         });
-
     }
 
     public void actionMarkerClick(Marker marker){
         marker.showInfoWindow();
+        isParkingSelected = true;
+        CameraUpdate markerLocation = CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15);
+        googleMap.animateCamera(markerLocation);
         selectedPark = markerToPlaceParking(marker);
         updateParkingData();
     }
@@ -395,20 +398,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void setScrollablePanelVisible(){
-        for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
+        /*for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
             View view = scrollablePanel.getChildAt(i);
             view.setVisibility(View.VISIBLE);
-        }
-        //scrollablePanel.setVisibility(View.VISIBLE);
+        }*/
+        scrollablePanel.setVisibility(View.VISIBLE);
         itinerary.setVisibility(View.VISIBLE);
     }
 
     public void setScrollablePanelInvisible(){
-        for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
+        /*for ( int i = 0; i < scrollablePanel.getChildCount();  i++ ){
             View view = scrollablePanel.getChildAt(i);
             view.setVisibility(View.INVISIBLE);
-        }
-        //scrollablePanel.setVisibility(View.INVISIBLE);
+        }*/
+        scrollablePanel.setVisibility(View.INVISIBLE);
         itinerary.setVisibility(View.INVISIBLE);
     }
 
@@ -601,11 +604,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void startUpdateTimer(int delay) {
         Log.d("MainActivity", "Update timer STARTED! Delay "+delay);
 
-        if(!isParkingSelected) {
             update = new Runnable() {
                 @Override
                 public void run() {
-                    if (myLocation != null) {
+                    if (myLocation != null && !isParkingSelected) {
                         runUpdatePlaces();
                         startUpdateTimer(10000);
                     } else {
@@ -615,7 +617,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             };
 
             handler.postDelayed(update, delay);
-        }
     }
 
     private void stopUpdateTimer() {
