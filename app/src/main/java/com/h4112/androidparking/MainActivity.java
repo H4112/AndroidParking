@@ -92,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RelativeLayout scrollablePanel;
     private FloatingActionButton itinerary;
 
+    private Marker markerSelectedPark;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -388,16 +390,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onMapClick(LatLng latLng) {
                 isParkingSelected = false;
+                if (markerSelectedPark != null) {
+                    markerSelectedPark.remove();
+                }
                 resetParkingData();
             }
         });
     }
 
     public void actionMarkerClick(Marker marker){
-        marker.showInfoWindow();
+        //marker.showInfoWindow();
+        if(markerSelectedPark!=null){
+            markerSelectedPark.remove();
+        }
         isParkingSelected = true;
         /*CameraUpdate markerLocation = CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15);
         googleMap.animateCamera(markerLocation);*/
+        MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
+                .position(marker.getPosition());
+        markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
         selectedPark = markerToPlaceParking(marker);
         updateParkingData();
     }
