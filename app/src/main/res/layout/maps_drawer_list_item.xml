@@ -24,4 +24,4 @@
     android:paddingRight="6dip"
     android:minHeight="50dp"
     android:singleLine="false"
-    android:textColor="@android:color/white"/>
+    android:textColor="#FF0000"/>
