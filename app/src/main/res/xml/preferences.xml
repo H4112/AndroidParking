@@ -44,9 +44,9 @@
         <com.pavelsikun.seekbarpreference.SeekBarPreference
             android:key="@string/portee_cle"
             android:title="@string/afficherPlacesPortee"
-            android:defaultValue="200"
-            sample:msbp_minValue="10"
+            sample:msbp_minValue="50"
             sample:msbp_maxValue="1000"
+            android:defaultValue="200"
             sample:msbp_measurementUnit="m"/>
 
     </PreferenceCategory>

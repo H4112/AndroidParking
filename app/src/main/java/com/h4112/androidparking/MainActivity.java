@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng myLocation = null;
     private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
     private PlaceParking selectedPark = null;
+    private PlaceParking reservedPark = null;
     private AlertDialog failDialog = null;
 
     private Handler handler = new Handler();
@@ -166,8 +167,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         setScrollablePanelInvisible();
 
-        ActionBar bar = getSupportActionBar();
-        bar.setBackgroundDrawable(new ColorDrawable(Color.RED));
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.RED));
     }
 
     @Override
@@ -215,8 +215,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void launchNavigation(){
-        //TODO
         Log.d("MainActivity", "--- Lancement de la navigation ---");
+
+        reservedPark = selectedPark;
 
         String   mode = "&mode=c";
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
@@ -493,7 +494,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
 
             case ITEM_GARE:
-                Toast.makeText(this, R.string.location_vehicule, Toast.LENGTH_LONG).show();
+                if(reservedPark != null){
+                    MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
+                            .position(reservedPark.getCoord());
+                    markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
+                }
+                else {
+                    Toast.makeText(this, R.string.location_vehicule, Toast.LENGTH_LONG).show();
+                }
                 break;
 
             case ITEM_COMPTE:

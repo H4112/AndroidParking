@@ -6,4 +6,6 @@
 
     <color name="couleurBackGroundMenu">#555555</color>
 
+    <color name="spashScreenColor">#FF0000</color>
+
 </resources>
