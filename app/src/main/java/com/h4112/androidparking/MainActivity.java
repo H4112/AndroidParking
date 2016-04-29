@@ -647,6 +647,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mClusterRenderer = new PlaceParkingClusterRenderer(this, googleMap, mClusterManager);
         mClusterManager.setRenderer(mClusterRenderer);
 
+        mClusterManager.setAlgorithm(new DensityBasedAlgorithm());
+
         googleMap.setOnCameraChangeListener(mClusterManager);
         googleMap.setOnMarkerClickListener(mClusterManager);
 
