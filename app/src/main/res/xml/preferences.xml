@@ -42,7 +42,7 @@
         android:title="@string/portee">
 
         <com.pavelsikun.seekbarpreference.SeekBarPreference
-            android:key="portee"
+            android:key="@string/portee_cle"
             android:title="@string/afficherPlacesPortee"
             android:defaultValue="200"
             sample:msbp_minValue="10"

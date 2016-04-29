@@ -31,6 +31,8 @@
 
     <string name="portee">Portée</string>
 
+    <string name="portee_cle">portee</string>
+
     <string name="place_en_mouvement">Place bientôt libérée</string>
     <string name="place_en_mouvement_depuis_longtemps">État inconnu</string>
 
@@ -38,7 +40,7 @@
     <string name="time_m">"%1$s min"</string>
     <string name="time_now">"Quelques instants"</string>
 
-    <string name="afficherPlacesPortee">Afficher les places dans un rayon de</string>
+    <string name="afficherPlacesPortee">Rayon de recherche</string>
     <string name="parking_spot">Place de parking</string>
     <string name="distance">Distance</string>
     <string name="meters">%1$s m</string>

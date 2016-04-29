@@ -14,12 +14,11 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
-        updateSeekBarTitle();
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        updateSeekBarTitle();
+
     }
 
     @Override
@@ -32,10 +31,5 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onPause() {
         getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
         super.onPause();
-    }
-
-    public void updateSeekBarTitle(){
-        com.pavelsikun.seekbarpreference.SeekBarPreference seekBar = (SeekBarPreference)findPreference("portee");
-        seekBar.setTitle(getString(R.string.afficherPlacesPortee)+" "+Integer.toString(seekBar.getCurrentValue())+" m");
     }
 }

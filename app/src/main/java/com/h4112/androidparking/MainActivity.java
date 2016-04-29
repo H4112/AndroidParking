@@ -3,12 +3,14 @@ package com.h4112.androidparking;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -67,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int ITEM_PARAMETRES = 0;
     private static final int ITEM_GARE = 1;
     private static final int ITEM_COMPTE = 2;
+
+    private int radius;
 
     private GoogleMap googleMap;
     private GoogleApiClient mGoogleApiClient;
@@ -410,6 +414,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        radius = preferences.getInt(getResources().getString(R.string.portee_cle), 10);
+
+        Log.d("MainActivity", "RADIUS ---- "+radius);
 
         startUpdateTimer();
     }
@@ -757,10 +766,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void runUpdatePlaces() {
+    public void runUpdatePlaces() {
         if(task != null) task.cancel(true);
 
+        Log.d("MainActivity", "RADIUS ---- "+radius);
+
         task = new FetchParkingSpotsTask(this);
-        task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, 1000));
+        task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, radius));
     }
 }
