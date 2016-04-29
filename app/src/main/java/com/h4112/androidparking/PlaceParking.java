@@ -53,7 +53,7 @@ public class PlaceParking implements Parcelable, ClusterItem {
     public LatLng getPosition() {
         return new LatLng(latitude, longitude);
     }
-    public enum Etat { LIBRE, OCCUPEE, EN_MOUVEMENT, INCONNU }
+    public enum Etat { LIBRE, OCCUPEE, EN_MOUVEMENT, INCONNU, GRANDLYON }
 
     private int id;
     private int idRue;
@@ -63,8 +63,16 @@ public class PlaceParking implements Parcelable, ClusterItem {
     private long derniereMaj;
     private String address;
     private int color;
+    private String etatString;
 
     private BitmapDescriptor icone;
+
+    public PlaceParking(int id, String etat, float latitude, float longitude, int idRue, long derniereMaj, String adresse){
+        this(id, Etat.GRANDLYON, latitude, longitude, idRue, derniereMaj, adresse);
+        etatString = etat;
+
+        updateIcone();
+    }
 
     public PlaceParking(int id, Etat etat, float latitude, float longitude, int idRue, long derniereMaj, String adresse){
         this.id=id;
@@ -74,6 +82,7 @@ public class PlaceParking implements Parcelable, ClusterItem {
         this.idRue=idRue;
         this.derniereMaj=derniereMaj;
         this.address = adresse;
+        this.etatString = null;
 
         updateIcone();
     }
@@ -89,6 +98,8 @@ public class PlaceParking implements Parcelable, ClusterItem {
         }else if(this.etat == Etat.EN_MOUVEMENT){
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_en_mouvement);
             color = Color.rgb(236, 194, 2);
+        }else if(this.etat == Etat.GRANDLYON && etatString != null){
+            color = Color.rgb(0, 0, 255);
         }else{
             icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_inconnu);
             color = Color.rgb(64, 64, 64);
@@ -130,6 +141,12 @@ public class PlaceParking implements Parcelable, ClusterItem {
         }
         else if(this.getEtat() == Etat.EN_MOUVEMENT){
             return c.getString(R.string.moving_spot);
+        }
+        else if(this.getEtat() == Etat.GRANDLYON){
+            if(etatString == null) {
+                etatString = "DONNEES INDISPONIBLES";
+            }
+            return etatString;
         }
         else{
             return c.getString(R.string.unknown_spot);
@@ -199,7 +216,7 @@ public class PlaceParking implements Parcelable, ClusterItem {
 
         return new PlaceParking(
                 Integer.parseInt(split[0]),
-                Etat.INCONNU,
+                Integer.parseInt(split[0]) < 0 ? Etat.GRANDLYON : Etat.INCONNU,
                 Float.parseFloat(split[2]),
                 Float.parseFloat(split[3]),
                 Integer.parseInt(split[1]),

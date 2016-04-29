@@ -42,6 +42,9 @@ public class RoadIdBasedAlgorithm implements Algorithm<PlaceParking> {
 
     @Override
     public synchronized Set<? extends Cluster<PlaceParking>> getClusters(double zoom) {
+        Log.d("Algorithm", "Start clustering.");
+        long time = System.currentTimeMillis();
+
         final double zoomSpecificSpan = 1000000 / Math.pow(2, zoom);
         Log.v("Algorithm", "Minimal distance is "+zoomSpecificSpan);
 
@@ -105,6 +108,8 @@ public class RoadIdBasedAlgorithm implements Algorithm<PlaceParking> {
                 }
             }
         }
+
+        Log.d("Algorithm", "End clustering. It took "+(System.currentTimeMillis() - time)+".");
 
         return clusterSet;
     }

@@ -17,9 +17,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Permet de récupérer la liste des places de parking dans un rayon donné.
@@ -60,19 +64,40 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             reader.close();
 
             try {
-                JSONArray sensors = new JSONArray(json);
+                JSONObject fullResponse = new JSONObject(json);
+
+                JSONArray sensors = fullResponse.getJSONArray("capteurs");
 
                 for(int i = 0; i < sensors.length(); i++) {
                     JSONObject sensor = sensors.getJSONObject(i);
 
                     PlaceParking thisSpot = new PlaceParking(
-                            sensor.getInt("id"),
+                            sensor.getInt("_id"),
                             getState(sensor.getString("etat")),
                             (float) sensor.getDouble("latitude"),
                             (float) sensor.getDouble("longitude"),
                             sensor.getInt("idRue"),
                             sensor.getLong("derniereMaj"),
                             sensor.getString("adresse"));
+
+                    placesParking.add(thisSpot);
+
+                    Log.v("FetchParkingSpotsTask", "New spot: "+thisSpot);
+                }
+
+                JSONArray parkings = fullResponse.getJSONArray("parkings");
+
+                for(int i = 0; i < parkings.length(); i++) {
+                    JSONObject parking = parkings.getJSONObject(i);
+
+                    PlaceParking thisSpot = new PlaceParking(
+                            - Integer.parseInt(parking.getString("_id")),
+                            parking.getString("etat"),
+                            (float) parking.getDouble("latitude"),
+                            (float) parking.getDouble("longitude"),
+                            - Integer.parseInt(parking.getString("_id")),
+                            getLastUpdate(parking.getString("last_update")),
+                            parking.getString("nom"));
 
                     placesParking.add(thisSpot);
 
@@ -94,6 +119,18 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         if(placesParking != null) Log.d("FetchParkingSpotsTask", "Returning "+placesParking.size()+" items");
 
         return placesParking;
+    }
+
+    private long getLastUpdate(String lastUpdate) {
+        if(lastUpdate.isEmpty()) return System.currentTimeMillis();
+
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.FRENCH)
+                    .parse(lastUpdate).getTime();
+        } catch (ParseException e) {
+            Log.e("FetchParkingSpotsTask", "Parse error! ",e);
+            return System.currentTimeMillis();
+        }
     }
 
     private PlaceParking.Etat getState(String etat) throws IllegalArgumentException {

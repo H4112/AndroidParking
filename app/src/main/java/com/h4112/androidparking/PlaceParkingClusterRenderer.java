@@ -11,12 +11,17 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.google.maps.android.ui.IconGenerator;
 import com.google.maps.android.ui.SquareTextView;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Objet permettant d'afficher les clusters de manière correcte dans l'application.
@@ -26,9 +31,12 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
     private final IconGenerator mIconGenerator;
     private ShapeDrawable mColoredCircleBackground;
     private final float mDensity;
+    private Context mContext;
 
     public PlaceParkingClusterRenderer(Context context, GoogleMap map, ClusterManager<PlaceParking> clusterManager) {
         super(context, map, clusterManager);
+
+        mContext = context;
 
         mDensity = context.getResources().getDisplayMetrics().density;
 
@@ -41,10 +49,38 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
     /**
      * Called before the marker for a ClusterItem is added to the map.
      */
-    protected void onBeforeClusterItemRendered(PlaceParking item, MarkerOptions markerOptions) {
-        markerOptions.icon(item.getIcone());
+    protected void onBeforeClusterItemRendered(final PlaceParking item, MarkerOptions markerOptions) {
         markerOptions.anchor(0.5f, 0.5f);
         markerOptions.alpha(0.9f);
+
+        if(item.getEtat() == PlaceParking.Etat.GRANDLYON) {
+            markerOptions.icon(getMarkerForGrandLyon(item));
+        } else {
+            markerOptions.icon(item.getIcone());
+        }
+    }
+
+    public BitmapDescriptor getMarkerForGrandLyon(final PlaceParking item) {
+        Cluster<PlaceParking> cluster = new Cluster<PlaceParking>() {
+            @Override
+            public LatLng getPosition() {
+                return item.getCoord();
+            }
+
+            @Override
+            public Collection<PlaceParking> getItems() {
+                return Collections.singletonList(item);
+            }
+
+            @Override
+            public int getSize() {
+                return 1;
+            }
+        };
+
+        MarkerOptions opts = new MarkerOptions();
+        onBeforeClusterRendered(cluster, opts);
+        return opts.getIcon();
     }
 
     /**
@@ -78,6 +114,7 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
     }
 
     private String getClusterText(Cluster<PlaceParking> cluster) {
+        boolean libreIndetermine = false;
         int nbPlacesLibres = 0, nbPlacesDepart = 0, nbPlacesOccupees = 0, nbPlacesInconnues = 0;
 
         for(PlaceParking p : cluster.getItems()) {
@@ -94,10 +131,30 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
                 case INCONNU:
                     nbPlacesInconnues++;
                     break;
+                case GRANDLYON:
+                    String s = p.getEtatString(mContext).substring(0, p.getEtatString(mContext).indexOf(" "));
+                    if (p.getEtatString(mContext).contains("INDISPONIBLE")) {
+                        nbPlacesInconnues++;
+                    } else if (p.getEtatString(mContext).contains("complet")) {
+                        nbPlacesOccupees++;
+                    } else {
+                        try {
+                            nbPlacesLibres += Integer.parseInt(s);
+                        } catch (NumberFormatException nfe) {
+                            if (p.getEtatString(mContext).contains("libre")) {
+                                //parking libre, mais sans nombre de places (cf Cité Internationale)
+                                libreIndetermine = true;
+                                nbPlacesInconnues++;
+                            }
+                        }
+                    }
+                    break;
             }
         }
 
-        if(nbPlacesInconnues == cluster.getSize()) {
+        if(cluster.getSize() == 1 && libreIndetermine) {
+            return "?";
+        } else if(nbPlacesInconnues == cluster.getSize()) {
             return "?";
         } else if(nbPlacesDepart != 0) {
             return nbPlacesLibres + " (+" + nbPlacesDepart + ")";
@@ -125,5 +182,23 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
         squareTextView.setPadding(twelveDpi, twelveDpi, twelveDpi, twelveDpi);
 
         return squareTextView;
+    }
+
+    /**
+     * Détermine si on doit afficher un cluster, ou seulement les marqueurs distincts.
+     * S'il y a seulement des parkings Grand Lyon, on groupe à partir de 2 éléments,
+     * sinon on groupe à partir de 5.
+     * @param cluster Le cluster sur lequel décider
+     * @return true s'il faut l'afficher comme cluster, false en tant que marqueurs
+     */
+    protected boolean shouldRenderAsCluster(Cluster<PlaceParking> cluster) {
+        if(cluster.getSize() <= 1) return false;
+        if(cluster.getSize() > 4) return true;
+        else {
+            for(PlaceParking p: cluster.getItems()) {
+                if(p.getEtat() == PlaceParking.Etat.GRANDLYON) return true;
+            }
+            return false;
+        }
     }
 }

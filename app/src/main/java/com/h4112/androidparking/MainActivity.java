@@ -227,6 +227,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void setListePlaces(ArrayList<PlaceParking> parkingList){
+        task = null;
+
         listePlaces = parkingList;
 
         displayAllParkingSpots(listePlaces);
@@ -235,6 +237,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void listePlacesFailure() {
+        task = null;
+
         if(!gotFirstSpotList) {
             stopUpdateTimer();
 
@@ -258,10 +262,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         PlaceParking bestPlace = null;
         double minDistance = findFirstDistanceFreePlace();
         for(PlaceParking place : listePlaces){
-            if(place.getDistanceFromPoint(myLocation) <= minDistance && place.getEtat()!=PlaceParking.Etat.OCCUPEE
+            if(place.getDistanceFromPoint(googleMap.getCameraPosition().target) <= minDistance
+                    && place.getEtat()!=PlaceParking.Etat.OCCUPEE
                     && place.getEtat()!=PlaceParking.Etat.INCONNU) {
                 bestPlace = place;
-                minDistance = place.getDistanceFromPoint(myLocation);
+                minDistance = place.getDistanceFromPoint(googleMap.getCameraPosition().target);
             }
         }
         return bestPlace;
@@ -270,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double findFirstDistanceFreePlace(){
         for(PlaceParking place : listePlaces){
             if(place.getEtat()!=PlaceParking.Etat.OCCUPEE && place.getEtat()!=PlaceParking.Etat.INCONNU) {
-                return place.getDistanceFromPoint(myLocation);
+                return place.getDistanceFromPoint(googleMap.getCameraPosition().target);
             }
         }
         return 0;
@@ -476,6 +481,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .position(selectedPark.getCoord());
                     markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
                     updateParkingData();
+                } else {
+                    resetParkingData();
                 }
                 return true;
 
@@ -646,7 +653,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mClusterRenderer = new PlaceParkingClusterRenderer(this, googleMap, mClusterManager);
         mClusterManager.setRenderer(mClusterRenderer);
 
-        mClusterManager.setAlgorithm(new RoadIdBasedAlgorithm());
+        //mClusterManager.setAlgorithm(new RoadIdBasedAlgorithm());
 
         googleMap.setOnCameraChangeListener(mClusterManager);
         googleMap.setOnMarkerClickListener(mClusterManager);
@@ -756,7 +763,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             Marker mark = mClusterRenderer.getMarker(place);
             if(mark != null) {
-                mark.setIcon(place.getIcone());
+                mark.setIcon(place.getEtat() == PlaceParking.Etat.GRANDLYON ?
+                        mClusterRenderer.getMarkerForGrandLyon(place) : place.getIcone());
             }
         }
     }
@@ -796,9 +804,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void runUpdatePlaces() {
-        if(task != null) task.cancel(true);
+        if(task != null) {
+            Log.d("MainActivity", "Launch request -> Do not want");
+            return;
+        }
 
-        Log.d("MainActivity", "RADIUS ---- "+radius);
+        Log.v("MainActivity", "RADIUS ---- "+radius);
 
         task = new FetchParkingSpotsTask(this);
         task.execute(new FetchParkingSpotsTask.Params(myLocation.latitude, myLocation.longitude, radius));
