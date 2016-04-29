@@ -43,6 +43,7 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
      */
     protected void onBeforeClusterItemRendered(PlaceParking item, MarkerOptions markerOptions) {
         markerOptions.icon(item.getIcone());
+        markerOptions.anchor(0.5f, 0.5f);
     }
 
     /**
@@ -50,8 +51,6 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
      * The default implementation draws a circle with a rough count of the number of items.
      */
     protected void onBeforeClusterRendered(Cluster<PlaceParking> cluster, MarkerOptions markerOptions) {
-        int bucket = getBucket(cluster);
-
         //calculer la couleur moyenne, en faisant la somme puis en divisant par le nombre d'éléments
         //pour chacune des 3 composantes
         int red = 0, green = 0, blue = 0;
@@ -69,9 +68,38 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
         int meanColor = Color.rgb(red, green, blue);
 
         mColoredCircleBackground.getPaint().setColor(meanColor);
-        BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(getClusterText(bucket)));
+        BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(getClusterText(cluster)));
 
         markerOptions.icon(descriptor);
+    }
+
+    private String getClusterText(Cluster<PlaceParking> cluster) {
+        int nbPlacesLibres = 0, nbPlacesDepart = 0, nbPlacesOccupees = 0, nbPlacesInconnues = 0;
+
+        for(PlaceParking p : cluster.getItems()) {
+            switch(p.getEtat()) {
+                case LIBRE:
+                    nbPlacesLibres++;
+                    break;
+                case OCCUPEE:
+                    nbPlacesOccupees++;
+                    break;
+                case EN_MOUVEMENT:
+                    nbPlacesDepart++;
+                    break;
+                case INCONNU:
+                    nbPlacesInconnues++;
+                    break;
+            }
+        }
+
+        if(nbPlacesInconnues == cluster.getSize()) {
+            return "?";
+        } else if(nbPlacesDepart != 0) {
+            return nbPlacesLibres + " (+" + nbPlacesDepart + ")";
+        } else {
+            return nbPlacesLibres+"";
+        }
     }
 
     private LayerDrawable makeClusterBackground() {

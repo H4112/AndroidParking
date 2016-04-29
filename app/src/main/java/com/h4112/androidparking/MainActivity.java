@@ -48,7 +48,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.Cluster;
-import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -104,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DrawerLayout drawer;
     private FloatingActionButton itinerary;
     private ClusterManager<PlaceParking> mClusterManager;
+    private PlaceParkingClusterRenderer mClusterRenderer;
 
     private FetchParkingSpotsTask task;
 
@@ -628,14 +628,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initClusterManager() {
         mClusterManager = new ClusterManager<>(this, googleMap);
-        mClusterManager.setRenderer(new PlaceParkingClusterRenderer(this, googleMap, mClusterManager));
+        mClusterRenderer = new PlaceParkingClusterRenderer(this, googleMap, mClusterManager);
+        mClusterManager.setRenderer(mClusterRenderer);
 
         googleMap.setOnCameraChangeListener(mClusterManager);
         googleMap.setOnMarkerClickListener(mClusterManager);
 
         mClusterManager.setOnClusterItemClickListener(clusterItemClickListener);
         mClusterManager.setOnClusterClickListener(clusterClickListener);
-
     }
 
     public void actionMarkerClick(PlaceParking placeParking){
@@ -698,12 +698,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void displayAllParkingSpots(List<PlaceParking> listPark){
-        googleMap.clear();
+        if(markerSelectedPark != null) markerSelectedPark.remove();
 
-        initClusterManager();
-
+        mClusterManager.clearItems();
         for(PlaceParking place : listPark){
             displayPark(place);
+        }
+        for(Marker m : mClusterManager.getClusterMarkerCollection().getMarkers()) {
+            Cluster<PlaceParking> cluster = mClusterRenderer.getCluster(m);
+            if(cluster != null) {
+                MarkerOptions options = new MarkerOptions();
+                mClusterRenderer.onBeforeClusterRendered(cluster, options);
+                m.setIcon(options.getIcon());
+            }
         }
         mClusterManager.cluster();
 
@@ -729,6 +736,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void displayPark(PlaceParking place){
         if(place != null){
             mClusterManager.addItem(place);
+
+            Marker mark = mClusterRenderer.getMarker(place);
+            if(mark != null) {
+                mark.setIcon(place.getIcone());
+            }
         }
     }
 
