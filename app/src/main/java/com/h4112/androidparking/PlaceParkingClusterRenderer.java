@@ -44,6 +44,7 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
     protected void onBeforeClusterItemRendered(PlaceParking item, MarkerOptions markerOptions) {
         markerOptions.icon(item.getIcone());
         markerOptions.anchor(0.5f, 0.5f);
+        markerOptions.alpha(0.9f);
     }
 
     /**
@@ -73,6 +74,7 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
         markerOptions.icon(descriptor);
 
         markerOptions.anchor(0.5f, 0.5f);
+        markerOptions.alpha(0.9f);
     }
 
     private String getClusterText(Cluster<PlaceParking> cluster) {
