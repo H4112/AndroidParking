@@ -71,6 +71,8 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
         BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mIconGenerator.makeIcon(getClusterText(cluster)));
 
         markerOptions.icon(descriptor);
+
+        markerOptions.anchor(0.5f, 0.5f);
     }
 
     private String getClusterText(Cluster<PlaceParking> cluster) {

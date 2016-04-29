@@ -71,7 +71,8 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
                             (float) sensor.getDouble("latitude"),
                             (float) sensor.getDouble("longitude"),
                             sensor.getInt("idRue"),
-                            sensor.getLong("derniereMaj"));
+                            sensor.getLong("derniereMaj"),
+                            sensor.getString("adresse"));
 
                     placesParking.add(thisSpot);
 
@@ -109,24 +110,6 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         if(places == null) {
             activity.listePlacesFailure();
         } else {
-            ArrayList<PlaceParking> toGeotag = new ArrayList<>(places);
-            for(PlaceParking placeParking : places) {
-                String cached = GeocodingTask.getAddressFromCache(placeParking);
-                if(cached != null) {
-                    placeParking.setAddress(cached);
-                    toGeotag.remove(placeParking);
-                } else {
-                    placeParking.setAddress(activity.getString(R.string.parking_spot));
-                }
-            }
-
-            if(!toGeotag.isEmpty()) {
-                GeocodingTask task = new GeocodingTask(activity);
-                PlaceParking[] parkArray = new PlaceParking[toGeotag.size()];
-                toGeotag.toArray(parkArray);
-                task.execute(parkArray);
-            }
-
             activity.setListePlaces(places);
         }
     }

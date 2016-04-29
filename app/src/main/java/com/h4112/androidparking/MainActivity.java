@@ -19,7 +19,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -647,7 +646,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mClusterRenderer = new PlaceParkingClusterRenderer(this, googleMap, mClusterManager);
         mClusterManager.setRenderer(mClusterRenderer);
 
-        mClusterManager.setAlgorithm(new DensityBasedAlgorithm());
+        mClusterManager.setAlgorithm(new RoadIdBasedAlgorithm());
 
         googleMap.setOnCameraChangeListener(mClusterManager);
         googleMap.setOnMarkerClickListener(mClusterManager);

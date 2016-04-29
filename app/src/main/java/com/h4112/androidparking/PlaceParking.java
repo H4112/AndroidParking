@@ -66,13 +66,14 @@ public class PlaceParking implements Parcelable, ClusterItem {
 
     private BitmapDescriptor icone;
 
-    public PlaceParking(int id, Etat etat, float latitude, float longitude, int idRue, long derniereMaj){
+    public PlaceParking(int id, Etat etat, float latitude, float longitude, int idRue, long derniereMaj, String adresse){
         this.id=id;
         this.etat=etat;
         this.latitude=latitude;
         this.longitude=longitude;
         this.idRue=idRue;
         this.derniereMaj=derniereMaj;
+        this.address = adresse;
 
         updateIcone();
     }
@@ -170,6 +171,10 @@ public class PlaceParking implements Parcelable, ClusterItem {
         return id;
     }
 
+    public int getIdRue() {
+        return idRue;
+    }
+
     @Override
     public String toString() {
         return "PlaceParking{" +
@@ -198,7 +203,8 @@ public class PlaceParking implements Parcelable, ClusterItem {
                 Float.parseFloat(split[2]),
                 Float.parseFloat(split[3]),
                 Integer.parseInt(split[1]),
-                System.currentTimeMillis());
+                System.currentTimeMillis(),
+                split[4]);
     }
 
     public String getAddress() {
