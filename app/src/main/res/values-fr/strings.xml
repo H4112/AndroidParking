@@ -49,4 +49,8 @@
     <string name="reserved_spots">Votre place a été réservée</string>
     <string name="yes_5">Oui (5)</string>
     <string name="no">Non</string>
+    <string name="no_result">Aucun résultat, veuillez vérifier votre recherche.</string>
+    <string name="ok">OK</string>
+    <string name="connect_error_geocoder">Impossible de récupérer les résultats, veuillez vérifier votre connexion Internet.</string>
+    <string name="error">Erreur</string>
 </resources>

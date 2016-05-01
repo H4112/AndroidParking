@@ -22,14 +22,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -45,6 +48,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -85,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SearchView searchview;
     private Marker markerSelectedPark;
     private AlertDialog failDialog = null;
+    private RelativeLayout progressBarLayout;
 
     //clusters
     private ClusterManager<PlaceParking> mClusterManager;
@@ -113,6 +118,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Handler handler = new Handler();
     private Runnable update = null;
     private FetchParkingSpotsTask task;
+    private GeocoderTask task2;
+    private Runnable mapDragFollower = null;
 
     ////////////////////////// ACTIVITY LIFECYCLE //////////////////////////
     @Override
@@ -146,6 +153,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         etat = (TextView)findViewById(R.id.etat);
         tempsLibreOccupee = (TextView)findViewById(R.id.tempsLibreOccupee);
         distance = (TextView)findViewById(R.id.distance);
+        progressBarLayout = (RelativeLayout) findViewById(R.id.progressBar);
+        progressBarLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //on empêche l'utilisateur de cliquer
+                return true;
+            }
+        });
 
         setScrollablePanelInvisible();
 
@@ -198,6 +213,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         stopUpdateTimer();
         if(failDialog != null) failDialog.dismiss();
+        if(task2 != null) task2.cancel(true);
+        if(mapDragFollower != null) handler.removeCallbacks(mapDragFollower);
     }
 
     ////////////////////////// LISTENERS //////////////////////////
@@ -227,7 +244,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_search:
                 //montrer / cacher la barre de recherche
                 searchview.setIconified(false);
-                if(searchview.getVisibility() == View.VISIBLE) {
+                if(searchview.getVisibility() == View.VISIBLE
+                        && progressBarLayout.getVisibility() != View.VISIBLE) {
                     searchview.setVisibility(View.GONE);
                     searchview.setQuery("", false);
                 } else {
@@ -383,7 +401,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return false;
                 }
             });
+            searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    task2 = new GeocoderTask(MainActivity.this);
+                    task2.execute(query);
+
+                    progressBarLayout.setVisibility(View.VISIBLE);
+                    searchview.clearFocus();
+
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return false;
+                }
+            });
         }
+    }
+
+    public void geocodingFinished(LatLng result) {
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(result, 15));
+
+        progressBarLayout.setVisibility(View.GONE);
+
+        searchview.setVisibility(View.GONE);
+        searchview.setQuery("", false);
+    }
+
+    public void geocodingFailed(boolean requestEnded) {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.error))
+                .setMessage(requestEnded ? getString(R.string.no_result) : getString(R.string.connect_error_geocoder))
+                .setPositiveButton(getString(R.string.ok), null)
+                .show();
+
+        progressBarLayout.setVisibility(View.GONE);
     }
 
     /**
@@ -573,7 +627,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //mClusterManager.setAlgorithm(new RoadIdBasedAlgorithm());
 
-        googleMap.setOnCameraChangeListener(mClusterManager);
+        googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                mClusterManager.onCameraChange(cameraPosition);
+
+                Log.v("MainActivity", "Map got dragged");
+
+                if(mapDragFollower != null) handler.removeCallbacks(mapDragFollower);
+                mapDragFollower = new Runnable() {
+                    @Override
+                    public void run() {
+                        mapDragFollower = null;
+
+                        Log.i("MainActivity", "Camera moved! I must refresh right now.");
+                        stopUpdateTimer();
+                        startUpdateTimer();
+                    }
+                };
+
+                handler.postDelayed(mapDragFollower, 200);
+            }
+        });
         googleMap.setOnMarkerClickListener(mClusterManager);
 
         mClusterManager.setOnClusterItemClickListener(clusterItemClickListener);
@@ -698,6 +773,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         if(task != null) {
             task.cancel(true);
+            task = null;
         }
     }
 
@@ -716,7 +792,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             LatLng target = googleMap.getCameraPosition().target;
 
             task = new FetchParkingSpotsTask(this);
-            task.execute(new FetchParkingSpotsTask.Params(target.latitude, target.longitude, 100000));
+            task.execute(new FetchParkingSpotsTask.Params(target.latitude, target.longitude, radius));
         }
     }
 

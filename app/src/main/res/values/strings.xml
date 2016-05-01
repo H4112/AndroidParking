@@ -51,4 +51,8 @@
     <string name="no">No</string>
     <string name="reserved_spots">Your space has been booked</string>
     <string name="yes_5">Yes (5)</string>
+    <string name="connect_error_geocoder">Unable to get results, please check your Internet connection.</string>
+    <string name="ok">OK</string>
+    <string name="no_result">No result found, please retry.</string>
+    <string name="error">Error</string>
 </resources>

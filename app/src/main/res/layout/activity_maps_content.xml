@@ -42,6 +42,31 @@
                 android:background="@android:color/white"
                 android:elevation="5dp"/>
 
+                <RelativeLayout
+                    android:id="@+id/progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/search"
+                    android:layout_alignLeft="@+id/search"
+                    android:layout_alignStart="@+id/search"
+                    android:layout_alignRight="@+id/search"
+                    android:layout_alignEnd="@+id/search"
+                    android:layout_alignBottom="@+id/search"
+                    android:background="#66666666"
+                    android:elevation="5dp"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp" />
+                </RelativeLayout>
+
             </RelativeLayout>
 
             <include layout="@layout/layout_parking" />
