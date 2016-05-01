@@ -16,6 +16,7 @@ import java.util.Set;
 
 /**
  * Clustering algorithm based on item density
+ * TODO USE ME OR DELETE ME!
  */
 public class RoadIdBasedAlgorithm implements Algorithm<PlaceParking> {
     ArrayList<PlaceParking> list = new ArrayList<>();
@@ -148,7 +149,7 @@ public class RoadIdBasedAlgorithm implements Algorithm<PlaceParking> {
                     PlaceParking p1 = list.get(i);
                     PlaceParking p2 = list.get(j);
 
-                    if(p1.getDistanceFromPoint(p2.getCoord()) < distance) return true;
+                    if(p1.getDistanceFromPoint(p2.getPosition()) < distance) return true;
                 }
             }
 

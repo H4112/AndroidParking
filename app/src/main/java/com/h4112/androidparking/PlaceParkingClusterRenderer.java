@@ -19,7 +19,6 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.google.maps.android.ui.IconGenerator;
 import com.google.maps.android.ui.SquareTextView;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -33,6 +32,12 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
     private final float mDensity;
     private Context mContext;
 
+    /**
+     * Permet de construire le ClusterRenderer.
+     * @param context Contexte de l'application
+     * @param map Carte sur laquelle afficher les clusters
+     * @param clusterManager Gestionnaire de clusters
+     */
     public PlaceParkingClusterRenderer(Context context, GoogleMap map, ClusterManager<PlaceParking> clusterManager) {
         super(context, map, clusterManager);
 
@@ -47,7 +52,39 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
     }
 
     /**
-     * Called before the marker for a ClusterItem is added to the map.
+     * Crée le fond arrondi pour le cluster.
+     * @return Fond arrondi
+     */
+    private LayerDrawable makeClusterBackground() {
+        mColoredCircleBackground = new ShapeDrawable(new OvalShape());
+        ShapeDrawable outline = new ShapeDrawable(new OvalShape());
+        outline.getPaint().setColor(0x80ffffff); // Transparent white.
+        LayerDrawable background = new LayerDrawable(new Drawable[]{outline, mColoredCircleBackground});
+        int strokeWidth = (int) (mDensity * 3);
+        background.setLayerInset(1, strokeWidth, strokeWidth, strokeWidth, strokeWidth);
+        return background;
+    }
+
+    /**
+     * Crée le texte pour les clusters.
+     * @param context Contexte de l'application
+     * @return Texte des clusters
+     */
+    private SquareTextView makeSquareTextView(Context context) {
+        SquareTextView squareTextView = new SquareTextView(context);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        squareTextView.setLayoutParams(layoutParams);
+        squareTextView.setId(com.google.maps.android.R.id.text);
+        int twelveDpi = (int) (12 * mDensity);
+        squareTextView.setPadding(twelveDpi, twelveDpi, twelveDpi, twelveDpi);
+
+        return squareTextView;
+    }
+
+    /**
+     * Appelé à chaque fois qu'une nouvelle place de parking doit être affichée sur la carte.
+     * @param item Place de parking à afficher
+     * @param markerOptions Options qui seront modifiées pour la création du marqueur
      */
     protected void onBeforeClusterItemRendered(final PlaceParking item, MarkerOptions markerOptions) {
         markerOptions.anchor(0.5f, 0.5f);
@@ -60,11 +97,16 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
         }
     }
 
+    /**
+     * Crée une icône pour une place du Grand Lyon.
+     * @param item Place du Grand Lyon à afficher
+     * @return Descripteur de l'icône pour le marqueur du parking
+     */
     public BitmapDescriptor getMarkerForGrandLyon(final PlaceParking item) {
         Cluster<PlaceParking> cluster = new Cluster<PlaceParking>() {
             @Override
             public LatLng getPosition() {
-                return item.getCoord();
+                return item.getPosition();
             }
 
             @Override
@@ -84,8 +126,9 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
     }
 
     /**
-     * Called before the marker for a Cluster is added to the map.
-     * The default implementation draws a circle with a rough count of the number of items.
+     * Appelé à chaque fois qu'un nouveau cluster doit être affichée sur la carte.
+     * @param cluster Regroupement de places de parking à afficher
+     * @param markerOptions Options qui seront modifiées pour la création du marqueur
      */
     protected void onBeforeClusterRendered(Cluster<PlaceParking> cluster, MarkerOptions markerOptions) {
         //calculer la couleur moyenne, en faisant la somme puis en divisant par le nombre d'éléments
@@ -113,6 +156,11 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
         markerOptions.alpha(0.9f);
     }
 
+    /**
+     * Définit le texte à afficher sur le cluster.
+     * @param cluster Cluster à afficher
+     * @return Texte à afficher sur le cluster
+     */
     private String getClusterText(Cluster<PlaceParking> cluster) {
         boolean libreIndetermine = false;
         int nbPlacesLibres = 0, nbPlacesDepart = 0, nbPlacesOccupees = 0, nbPlacesInconnues = 0;
@@ -161,27 +209,6 @@ public class PlaceParkingClusterRenderer extends DefaultClusterRenderer<PlacePar
         } else {
             return nbPlacesLibres+"";
         }
-    }
-
-    private LayerDrawable makeClusterBackground() {
-        mColoredCircleBackground = new ShapeDrawable(new OvalShape());
-        ShapeDrawable outline = new ShapeDrawable(new OvalShape());
-        outline.getPaint().setColor(0x80ffffff); // Transparent white.
-        LayerDrawable background = new LayerDrawable(new Drawable[]{outline, mColoredCircleBackground});
-        int strokeWidth = (int) (mDensity * 3);
-        background.setLayerInset(1, strokeWidth, strokeWidth, strokeWidth, strokeWidth);
-        return background;
-    }
-
-    private SquareTextView makeSquareTextView(Context context) {
-        SquareTextView squareTextView = new SquareTextView(context);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        squareTextView.setLayoutParams(layoutParams);
-        squareTextView.setId(com.google.maps.android.R.id.text);
-        int twelveDpi = (int) (12 * mDensity);
-        squareTextView.setPadding(twelveDpi, twelveDpi, twelveDpi, twelveDpi);
-
-        return squareTextView;
     }
 
     /**

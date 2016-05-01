@@ -20,7 +20,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +31,12 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         Void, ArrayList<PlaceParking>> {
     private MainActivity activity;
 
+    /**
+     * Crée une nouvelle tâche de récupération des parkings.
+     * A l'issue de cette tâche, activity.listePlacesFailure() ou activity.setListePlaces(list)
+     * sera appelé.
+     * @param activity Activité à partir de laquelle cette tâche est lancée
+     */
     public FetchParkingSpotsTask(MainActivity activity) {
         super();
         this.activity = activity;
@@ -50,6 +55,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         ArrayList<PlaceParking> placesParking = new ArrayList<>();
 
         try {
+            //télécharger le JSON depuis le serveur
             String json = "";
             URL url = new URL("https://parking.rsauget.fr:8080/sensors?latitude="+param.latitude
                     +"&longitude="+param.longitude+"&radius="+param.radius);
@@ -64,6 +70,8 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             reader.close();
 
             try {
+                //traiter ce JSON pour fabriquer des PlaceParking
+                //tout d'abord les capteurs
                 JSONObject fullResponse = new JSONObject(json);
 
                 JSONArray sensors = fullResponse.getJSONArray("capteurs");
@@ -85,6 +93,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
                     Log.v("FetchParkingSpotsTask", "New spot: "+thisSpot);
                 }
 
+                //puis les parkings fournis par le Grand Lyon
                 JSONArray parkings = fullResponse.getJSONArray("parkings");
 
                 for(int i = 0; i < parkings.length(); i++) {
@@ -112,6 +121,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             placesParking = null;
         }
 
+        //mise en cache des parkings
         Log.v("FetchParkingSpotsTask", "Start caching");
         placesParking = loadOrSaveSpots(placesParking, param);
         Log.v("FetchParkingSpotsTask", "End caching");
@@ -121,6 +131,12 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         return placesParking;
     }
 
+    /**
+     * Transforme une date du type 2016-01-05 10:59:28 en timestamp
+     * (comparable à System.currentTimeMillis()).
+     * @param lastUpdate Date sous forme de String
+     * @return Date sous forme de timestamp
+     */
     private long getLastUpdate(String lastUpdate) {
         if(lastUpdate.isEmpty()) return System.currentTimeMillis();
 
@@ -133,6 +149,12 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         }
     }
 
+    /**
+     * Permet d'obtenir l'état à partir de la chaîne de caractères envoyée par le serveur.
+     * @param etat Soit "libre", soit "depart", soit "occupe"
+     * @return Le PlaceParking.Etat correspondant
+     * @throws IllegalArgumentException Si l'état ne correspond à aucun des 3 valides énoncés ci-dessus
+     */
     private PlaceParking.Etat getState(String etat) throws IllegalArgumentException {
         switch(etat) {
             case "depart": return PlaceParking.Etat.EN_MOUVEMENT;
@@ -151,11 +173,26 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         }
     }
 
+    @Override
+    protected void onCancelled(ArrayList<PlaceParking> result) {
+        Log.i("FetchParkingSpotsTask", "Task was canceled. Not calling back MainActivity!");
+    }
+
+    /**
+     * Paramètres d'exécution de la tâche de récupération des places de parking.
+     */
     protected static class Params {
         private double latitude;
         private double longitude;
         private int radius;
 
+        /**
+         * Permet de créer des paramètres, qui pourront être passés à la tâche.
+         * @param latitude Latitude de référence
+         * @param longitude Longitude de référence
+         * @param radius Rayon (en mètres) par rapport à la position de référence,
+         *               dans laquelle il faut trouver des places de parking
+         */
         public Params(double latitude, double longitude, int radius) {
             this.latitude = latitude;
             this.longitude = longitude;
@@ -163,19 +200,18 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         }
     }
 
-
-
     /**
      * Si spots = null, charge des places de parking depuis le cache et les renvoie.
      * Si spots != null, met à jour le cache et renvoie spots non modifié.
      * @param spots Places renvoyées par le serveur
      * @return Places à afficher
      */
-    private ArrayList<PlaceParking> loadOrSaveSpots(ArrayList<PlaceParking> spots, Params params) {
+    private ArrayList<PlaceParking> loadOrSaveSpots(final ArrayList<PlaceParking> spots, Params params) {
         String path = activity.getCacheDir().getPath() + File.separator + "parkingspots.txt";
 
         List<PlaceParking> cached = new LinkedList<>();
 
+        //lire tout le cache depuis le fichier
         File f = new File(path);
         if(f.exists()) {
             try {
@@ -195,6 +231,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             }
         }
 
+        //filtrer tous ces résultats pour garder ceux qui sont dans le rayon
         ArrayList<PlaceParking> possibleOnesFromCache = new ArrayList<>();
         for(PlaceParking p : cached) {
             if(p.getDistanceFromPoint(new LatLng(params.latitude, params.longitude)) < params.radius) {
