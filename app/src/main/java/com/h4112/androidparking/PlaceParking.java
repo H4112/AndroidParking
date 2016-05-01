@@ -166,7 +166,7 @@ public class PlaceParking implements Parcelable, ClusterItem {
 
     /**
      * Donne l'état actuel du capteur (Etat.GRANDLYON si c'est un parking du Grand Lyon).
-     * @return
+     * @return État actuel du capteur
      */
     public Etat getEtat(){
         return this.etat;

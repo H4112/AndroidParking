@@ -5,11 +5,11 @@
     <item android:id="@+id/action_find_place"
         android:icon="@drawable/ic_star_rate_white_18pt_2x"
         android:title="@string/best_place"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white"
         android:title="@string/search"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
 
 </menu>

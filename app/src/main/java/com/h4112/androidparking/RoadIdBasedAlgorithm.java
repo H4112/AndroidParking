@@ -55,7 +55,7 @@ public class RoadIdBasedAlgorithm implements Algorithm<PlaceParking> {
             if(clusterIds.containsKey(p.getIdRue())) {
                 clusterIds.get(p.getIdRue()).add(p);
             } else {
-                ArrayList<PlaceParking> newOne = new ArrayList<PlaceParking>();
+                ArrayList<PlaceParking> newOne = new ArrayList<>();
                 newOne.add(p);
                 clusterIds.put(p.getIdRue(), newOne);
             }

@@ -16,7 +16,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:supportsRtl="true">
 
         <activity
             android:name="com.h4112.androidparking.MainActivity"
@@ -29,7 +30,8 @@
 
         <activity
             android:name="com.h4112.androidparking.Settings"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.Params" />
                 <category android:name="android.intent.category.LAUNCHER" />

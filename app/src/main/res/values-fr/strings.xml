@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">OnlyPark</string>
+
+    <string name="search">Rechercher</string>
+    <string name="best_place">Meilleure place</string>
+
+    <string name="filtreParking">Filtre parking</string>
+    <string name="filtrePlaces">Filtre places</string>
+
+    <string name="parkingPrives">Parkings privés</string>
+    <string name="parkingPublics">Parkings publics</string>
+    <string name="placesLibres">Places libres</string>
+    <string name="placesOccupées">Places occupées</string>
+    <string name="placesEnCoursLiberation">Places sur le point de se libérer</string>
+    <string name="unable_to_locate">Impossible de vous localiser.</string>
+    <string name="need_rights">Merci d\'autoriser l\'application à utiliser votre position dans les paramètres.</string>
+    <string name="nav_drawer_open">Tiroir de navigation ouvert</string>
+    <string name="nav_drawer_closed">Tiroir de navigation fermé</string>
+    <string name="option_location_gare">Où suis-je garé ?</string>
+    <string name="option_location_settings">Paramètres</string>
+    <string name="option_location_account">Mon compte</string>
+    <string name="location_vehicule">Vous n\'êtes pas garé !</string>
+    <string name="error_getting_parks">Nous n\'avons pas pu récupérer les parkings à proximité. Veuillez vérifier votre connexion Internet et réessayer.</string>
+    <string name="retry">Réessayer</string>
+    <string name="close">Fermer</string>
+
+    <string name="portee">Portée</string>
+
+    <string name="time_h">"%1$s h et %2$s min"</string>
+    <string name="time_m">"%1$s min"</string>
+    <string name="time_now">"Quelques instants"</string>
+
+    <string name="afficherPlacesPortee">Rayon de recherche</string>
+    <string name="distance">Distance</string>
+    <string name="meters">%1$s m</string>
+    <string name="kilometers">%1$s km</string>
+    <string name="parking">Parking</string>
+    <string name="public_spot">Public</string>
+    <string name="private_spot">Privé</string>
+    <string name="since">Depuis</string>
+
+    <string name="free_spot">Place libre</string>
+    <string name="busy_spot">Place occupée</string>
+    <string name="moving_spot">Place bientôt libre</string>
+    <string name="unknown_spot">État inconnu</string>
+
+    <string name="yes_countdown">Oui (%1$s)</string>
+    <string name="run_navigation">Voulez-vous lancer la navigation ?</string>
+    <string name="reserved_spots">Votre place a été réservée</string>
+    <string name="yes_5">Oui (5)</string>
+    <string name="no">Non</string>
+</resources>

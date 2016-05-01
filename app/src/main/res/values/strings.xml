@@ -1,58 +1,54 @@
 <resources>
     <string name="app_name">OnlyPark</string>
-    <string name="mapKey">AIzaSyBelsU5muR5AP8vsrB2-AsuZKIcqbT1fm0</string>
-    <string name="exit">Quitter</string>
-    <string name="settings">Options</string>
-    <string name="search">Rechercher</string>
-    <string name="best_place">Meilleure place</string>
 
-    <string name="filtreParking">Filtre parking</string>
-    <string name="filtrePlaces">Filtre places</string>
+    <string name="search">Search</string>
+    <string name="best_place">Best parking space</string>
 
-    <string name="type_parking_titre">Type de places</string>
-    <string name="type_place_titre">Type de parking</string>
+    <string name="filtreParking">Parking lots filter</string>
+    <string name="filtrePlaces">Parking spaces filter</string>
 
-    <string name="parkingPrives">Parkings privés</string>
-    <string name="parkingPublics">Parkings publics</string>
-    <string name="placesLibres">Places libres</string>
-    <string name="placesOccupées">Places occupées</string>
-    <string name="placesEnCoursLiberation">Places sur le point de se libérer</string>
-    <string name="unable_to_locate">Impossible de vous localiser.</string>
-    <string name="need_rights">Merci d\'autoriser l\'application à utiliser votre position dans les paramètres.</string>
-    <string name="nav_drawer_open">Tiroir de navigation ouvert</string>
-    <string name="nav_drawer_closed">Tiroir de navigation fermé</string>
-    <string name="option_location_gare">Où suis-je garé ?</string>
-    <string name="option_location_settings">Paramètres</string>
-    <string name="option_location_account">Mon compte</string>
-    <string name="location_vehicule">Vous n\'êtes pas garé !</string>
-    <string name="error_getting_parks">Nous n\'avons pas pu récupérer les parkings à proximité. Veuillez vérifier votre connexion Internet et réessayer.</string>
-    <string name="retry">Réessayer</string>
-    <string name="close">Fermer</string>
+    <string name="parkingPrives">Private parking lots</string>
+    <string name="parkingPublics">Public parking lots</string>
+    <string name="placesLibres">Free spaces</string>
+    <string name="placesOccupées">Busy spaces</string>
+    <string name="placesEnCoursLiberation">Spaces about to be freed</string>
+    <string name="unable_to_locate">We could not get your location.</string>
+    <string name="need_rights">Please allow the app to get your location in your phone\'s settings.</string>
+    <string name="nav_drawer_open">Open navigation drawer.</string>
+    <string name="nav_drawer_closed">Closed navigation drawer</string>
+    <string name="option_location_gare">Where is my car?</string>
+    <string name="option_location_settings">Settings</string>
+    <string name="option_location_account">My account</string>
+    <string name="location_vehicule">You are not parked!</string>
+    <string name="error_getting_parks">We could not get the nearby parking spaces. Please check your Internet connection and retry.</string>
+    <string name="retry">Retry</string>
+    <string name="close">Close</string>
 
-    <string name="portee">Portée</string>
+    <string name="portee">Range</string>
 
-    <string name="portee_cle">portee</string>
+    <string name="portee_cle" translatable="false">portee</string>
 
-    <string name="place_en_mouvement">Place bientôt libérée</string>
-    <string name="place_en_mouvement_depuis_longtemps">État inconnu</string>
+    <string name="time_h">"%1$s hour(s) and %2$s minute(s)"</string>
+    <string name="time_m">"%1$s minute(s)"</string>
+    <string name="time_now">"Less than a minute"</string>
 
-    <string name="time_h">"%1$s h et %2$s min"</string>
-    <string name="time_m">"%1$s min"</string>
-    <string name="time_now">"Quelques instants"</string>
-
-    <string name="afficherPlacesPortee">Rayon de recherche</string>
-    <string name="parking_spot">Place de parking</string>
+    <string name="afficherPlacesPortee">Search radius</string>
     <string name="distance">Distance</string>
-    <string name="meters">%1$s m</string>
-    <string name="kilometers">%1$s km</string>
-    <string name="parking">Parking</string>
+    <string name="meters">%1$s meters</string>
+    <string name="kilometers">%1$s kilometer(s)</string>
+    <string name="parking">Parking </string>
     <string name="public_spot">Public</string>
-    <string name="private_spot">Privé</string>
-    <string name="since">Depuis</string>
+    <string name="private_spot">Private</string>
+    <string name="since">For</string>
 
-    <string name="free_spot">Place libre</string>
-    <string name="busy_spot">Place occupée</string>
-    <string name="moving_spot">Place bientôt libre</string>
-    <string name="unknown_spot">État inconnu</string>
+    <string name="free_spot">Free space</string>
+    <string name="busy_spot">Busy space</string>
+    <string name="moving_spot">Space is being freed</string>
+    <string name="unknown_spot">Unknown state</string>
 
+    <string name="yes_countdown">Yes (%1$s)</string>
+    <string name="run_navigation">Do you want to run the navigation?</string>
+    <string name="no">No</string>
+    <string name="reserved_spots">Your space has been booked</string>
+    <string name="yes_5">Yes (5)</string>
 </resources>

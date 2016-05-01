@@ -176,7 +176,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onStart();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        radius = preferences.getInt(getResources().getString(R.string.portee_cle), 10);
+        radius = preferences.getInt(getResources().getString(R.string.portee_cle), -1);
+
+        if(radius == -1) {
+            radius = 200;
+
+            SharedPreferences.Editor edit = preferences.edit();
+            edit.putInt(getResources().getString(R.string.portee_cle), radius);
+            edit.apply();
+        }
 
         Log.d("MainActivity", "RADIUS ---- " + radius);
 
@@ -576,7 +584,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Appelé lorsque l'utilisateur appuie sur un marqueur.
      * @param placeParking Place de parking choisie
      */
-    public void actionMarkerClick(PlaceParking placeParking){
+    private void actionMarkerClick(PlaceParking placeParking){
         if(markerSelectedPark!=null){
             markerSelectedPark.remove();
         }
@@ -696,7 +704,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Lance la tâche de récupération des places de parking (FetchParkingSpotsTask).
      */
-    public void runUpdatePlaces() {
+    private void runUpdatePlaces() {
         if(task != null) {
             Log.d("MainActivity", "Launch request -> Do not want");
             return;
@@ -865,22 +873,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //demander si on veut lancer la navigation
         final AlertDialog popup = new AlertDialog.Builder(this)
-                .setMessage("Voulez-vous lancer la navigation ?")
-                .setPositiveButton("Oui (5)", new DialogInterface.OnClickListener() {
+                .setMessage(getString(R.string.run_navigation))
+                .setPositiveButton(getString(R.string.yes_5), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         launchNavigation();
                     }
                 })
-                .setNegativeButton("Non", null)
-                .setTitle("Votre place a été réservée")
+                .setNegativeButton(getString(R.string.no), null)
+                .setTitle(getString(R.string.reserved_spots))
                 .show();
 
         //mettre en place le compte à rebours sélectionnant automatiquement "oui"
         new CountDownTimer(6000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                popup.getButton(DialogInterface.BUTTON_POSITIVE).setText("Oui ("+(millisUntilFinished/1000)+")");
+                popup.getButton(DialogInterface.BUTTON_POSITIVE).setText(getString(R.string.yes_countdown, millisUntilFinished / 1000));
             }
 
             @Override
@@ -898,7 +906,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Lance la navigation Google Maps vers la destination (selectedPark).
      */
-    public void launchNavigation(){
+    private void launchNavigation(){
         Log.d("MainActivity", "--- Lancement de la navigation ---");
 
         String   mode = "&mode=c";
