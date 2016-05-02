@@ -74,7 +74,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int ITEM_PARAMETRES = 0;
     private static final int ITEM_GARE = 1;
     private static final int ITEM_COMPTE = 2;
-    private String[] MENU_OPTIONS;
+    private String[][] MENU_OPTIONS;
+    private final String URI_RESOURCE = "android.resource://com.h4112.androidparking/";
 
     //vues
     private GoogleMap googleMap;
@@ -126,10 +127,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MENU_OPTIONS = new String[]{
-                getString(R.string.option_location_settings),
-                getString(R.string.option_location_gare),
-                getString(R.string.option_location_account)
+        MENU_OPTIONS = new String[][]{
+                {
+                    getString(R.string.option_location_settings),
+                    getString(R.string.option_location_gare),
+                    getString(R.string.option_location_account)
+                },
+                {
+                        URI_RESOURCE+R.drawable.ic_settings_black_48dp,URI_RESOURCE+R.drawable.ic_pin_drop_black_48dp,URI_RESOURCE+R.drawable.ic_account_circle_black_48dp
+                }
         };
 
         setContentView(R.layout.activity_maps);
@@ -445,14 +451,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private void initDrawerList() {
         List<Map<String, String>> options = new ArrayList<>();
-        for(String name : MENU_OPTIONS) {
-            options.add(getNameOnlyMap(name));
+        for(int i=0; i<MENU_OPTIONS[0].length; i++) {
+            options.add(getNameAndPictureOnlyMap(MENU_OPTIONS[0][i], MENU_OPTIONS[1][i]));
         }
 
         ListView optionsList = (ListView) findViewById(R.id.optionsListView);
         if (optionsList != null) {
             optionsList.setAdapter(new SimpleAdapter(this, options, R.layout.maps_drawer_list_item,
-                    new String[]{"name"}, new int[]{R.id.text1}));
+                    new String[]{"name", "picture"}, new int[]{R.id.text1, R.id.view}));
 
             optionsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -468,9 +474,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param name Le nom à renseigner
      * @return La nouvelle map créée
      */
-    private Map<String, String> getNameOnlyMap(String name) {
+    private Map<String, String> getNameAndPictureOnlyMap(String name, String picture) {
         HashMap<String, String> map = new HashMap<>();
         map.put("name", name);
+        map.put("picture", picture);
         return map;
     }
 
