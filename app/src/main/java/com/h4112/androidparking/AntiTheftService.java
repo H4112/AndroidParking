@@ -111,7 +111,7 @@ public class AntiTheftService extends Service implements FetchParkingSpotsTask.C
     }
 
     @Override
-    public void setListePlaces(ArrayList<PlaceParking> parks) {
+    public void setListePlaces(ArrayList<PlaceParking> parks, FetchParkingSpotsTask.Params params) {
         PlaceParking theOne = null;
         for(PlaceParking p : parks) {
             if(p.getId() == id) {

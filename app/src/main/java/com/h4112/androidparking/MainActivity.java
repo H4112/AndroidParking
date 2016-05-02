@@ -50,7 +50,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -96,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RelativeLayout progressBarLayout;
     private FrameLayout splashLaunchScreen;
     private TableLayout tableLayout;
+    private Circle radiusCircle;
+    private Marker radiusPin;
 
     //clusters
     private ClusterManager<PlaceParking> mClusterManager;
@@ -871,12 +876,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Retour de FetchParkingSpotsTask : donne une nouvelle liste de parkings récupérée depuis
      * le serveur ou le cache.
      * @param parkingList Liste des places de parking
+     * @param params Paramètres qui ont été donnés à la recherche de places
      */
     @Override
-    public void setListePlaces(ArrayList<PlaceParking> parkingList){
+    public void setListePlaces(ArrayList<PlaceParking> parkingList, FetchParkingSpotsTask.Params params){
         task = null;
 
         listePlaces = parkingList;
+
+        Circle prevRadiusCircle = radiusCircle;
+        Marker prevRadiusPin = radiusPin;
+
+        radiusCircle = googleMap.addCircle(new CircleOptions()
+            .center(new LatLng(params.latitude, params.longitude))
+            .radius(radius)
+            .fillColor(getResources().getColor(R.color.circleFillColor))
+            .strokeColor(getResources().getColor(R.color.circleStrokeColor))
+            .strokeWidth(2));
+
+        if(prevRadiusCircle != null) prevRadiusCircle.remove();
+
+        radiusPin = googleMap.addMarker(new MarkerOptions()
+            .position(new LatLng(params.latitude, params.longitude))
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
+
+        if(prevRadiusPin != null) prevRadiusPin.remove();
 
         displayAllParkingSpots(listePlaces);
 

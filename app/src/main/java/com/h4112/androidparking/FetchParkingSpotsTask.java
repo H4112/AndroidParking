@@ -34,6 +34,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         Void, ArrayList<PlaceParking>> {
     private Callback callback;
     private Context context;
+    private Params param;
 
     /**
      * Crée une nouvelle tâche de récupération des parkings.
@@ -56,7 +57,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
 
         Log.v("FetchParkingSpotsTask", "Beginning download of sensors from the server");
 
-        Params param = params[0];
+        param = params[0];
 
         ArrayList<PlaceParking> placesParking = null;
 
@@ -118,11 +119,14 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
                 for(int i = 0; i < parkings.length(); i++) {
                     JSONObject parking = parkings.getJSONObject(i);
 
+                    JSONObject loc = parking.getJSONObject("loc");
+                    JSONArray params = loc.getJSONArray("coordinates");
+
                     PlaceParking thisSpot = new PlaceParking(
                             - Integer.parseInt(parking.getString("_id")),
                             parking.getString("etat"),
-                            (float) parking.getDouble("latitude"),
-                            (float) parking.getDouble("longitude"),
+                            (float) params.getDouble(1),
+                            (float) params.getDouble(0),
                             - Integer.parseInt(parking.getString("_id")),
                             getLastUpdate(parking.getString("last_update")),
                             parking.getString("nom"));
@@ -198,14 +202,17 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
      */
     @NonNull
     private PlaceParking getPlaceParkingFromJSON(JSONObject sensor) throws JSONException {
+        JSONObject loc = sensor.getJSONObject("loc");
+        JSONArray params = loc.getJSONArray("coordinates");
+
         return new PlaceParking(
-                                sensor.getInt("_id"),
-                                getState(sensor.getString("etat")),
-                                (float) sensor.getDouble("latitude"),
-                                (float) sensor.getDouble("longitude"),
-                                sensor.getInt("idRue"),
-                                sensor.getLong("derniereMaj"),
-                                sensor.getString("adresse"));
+            sensor.getInt("_id"),
+            getState(sensor.getString("etat")),
+            (float) params.getDouble(1),
+            (float) params.getDouble(0),
+            sensor.getInt("idRue"),
+            sensor.getLong("derniereMaj"),
+            sensor.getString("adresse"));
     }
 
     /**
@@ -246,7 +253,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         if(places == null) {
             callback.listePlacesFailure();
         } else {
-            callback.setListePlaces(places);
+            callback.setListePlaces(places, param);
         }
     }
 
@@ -262,9 +269,9 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         public enum Mode { AROUND_POSITION, BY_ID }
         private Mode mode;
 
-        private double latitude;
-        private double longitude;
-        private int radius;
+        public double latitude;
+        public double longitude;
+        public int radius;
 
         private int id;
 
@@ -375,7 +382,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
 
     public interface Callback {
         void listePlacesFailure();
-        void setListePlaces(ArrayList<PlaceParking> parks);
+        void setListePlaces(ArrayList<PlaceParking> parks, Params params);
     }
 }
 
