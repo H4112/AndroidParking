@@ -749,7 +749,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             (displayFreePlaces && place.getEtat() == PlaceParking.Etat.LIBRE) ||
                             (displayBusyPlaces && place.getEtat() == PlaceParking.Etat.OCCUPEE) ||
                             (displayMovingPlaces && place.getEtat() == PlaceParking.Etat.EN_MOUVEMENT)
-                            )) || displayPrivateParking
+                            )) || (displayPrivateParking && place.getEtat() == PlaceParking.Etat.GRANDLYON)
                     ) {
 
                         mClusterManager.addItem(place);
