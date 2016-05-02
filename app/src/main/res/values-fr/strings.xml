@@ -3,8 +3,8 @@
     <string name="search">Rechercher</string>
     <string name="best_place">Meilleure place</string>
 
-    <string name="filtreParking">Filtre parking</string>
-    <string name="filtrePlaces">Filtre places</string>
+    <string name="filtreParking">Type de parking</string>
+    <string name="filtrePlaces">Type de place</string>
 
     <string name="parkingPrives">Parkings privés</string>
     <string name="parkingPublics">Parkings publics</string>

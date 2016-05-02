@@ -22,6 +22,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -30,7 +31,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
@@ -133,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     getString(R.string.option_location_account)
                 },
                 {
-                        URI_RESOURCE+R.drawable.ic_settings_black_48dp,URI_RESOURCE+R.drawable.ic_pin_drop_black_48dp,URI_RESOURCE+R.drawable.ic_account_circle_black_48dp
+                        URI_RESOURCE+R.drawable.ic_settings_black_24dp,URI_RESOURCE+R.drawable.ic_pin_drop_black_24dp,URI_RESOURCE+R.drawable.ic_account_circle_black_24dp
                 }
         };
 
@@ -576,6 +579,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         toggle = new ActionBarDrawerToggle(
                 this, drawer, R.string.nav_drawer_open, R.string.nav_drawer_closed);
         if (drawer != null) {

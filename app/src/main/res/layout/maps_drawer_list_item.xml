@@ -10,7 +10,7 @@
         android:id="@+id/view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_settings_black_48dp"
+        android:src="@drawable/ic_settings_black_24dp"
         android:paddingLeft="10dp"
         android:paddingRight="6dip"
         android:paddingTop="10dp"
@@ -26,12 +26,12 @@
         android:paddingLeft="10dp"
         android:paddingRight="6dip"
         android:text="yolo"
-        android:paddingTop="23dp"
-        android:paddingBottom="23dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:minHeight="50dp"
-        android:textStyle="bold"
         android:singleLine="false"
-        android:textColor="#FF0000"/>
+        android:alpha="0.87"
+        android:textColor="#000000"/>
 
 </LinearLayout>
 
