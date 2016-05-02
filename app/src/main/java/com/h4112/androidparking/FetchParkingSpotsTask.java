@@ -1,6 +1,9 @@
 package com.h4112.androidparking;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -29,17 +32,20 @@ import java.util.Locale;
  */
 public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Params,
         Void, ArrayList<PlaceParking>> {
-    private MainActivity activity;
+    private Callback callback;
+    private Context context;
 
     /**
      * Crée une nouvelle tâche de récupération des parkings.
      * A l'issue de cette tâche, activity.listePlacesFailure() ou activity.setListePlaces(list)
      * sera appelé.
-     * @param activity Activité à partir de laquelle cette tâche est lancée
+     * @param context Contexte de l'application
+     * @param callback Callback permettant de renvoyer le résultat à l'application
      */
-    public FetchParkingSpotsTask(MainActivity activity) {
+    public FetchParkingSpotsTask(Context context, Callback callback) {
         super();
-        this.activity = activity;
+        this.context = context;
+        this.callback = callback;
     }
 
     @Override
@@ -52,22 +58,42 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
 
         Params param = params[0];
 
+        ArrayList<PlaceParking> placesParking = null;
+
+        if(param.mode == Params.Mode.AROUND_POSITION) {
+            placesParking = getPlacesParkingAroundPosition(param);
+
+            //mise en cache des parkings
+            Log.v("FetchParkingSpotsTask", "Start caching");
+            placesParking = loadOrSaveSpots(placesParking, param);
+            Log.v("FetchParkingSpotsTask", "End caching");
+        } else {
+            PlaceParking place = getPlaceParkingById(param);
+
+            if (place != null) {
+                placesParking = new ArrayList<>(1);
+                placesParking.add(place);
+            }
+        }
+
+        if(placesParking != null) Log.d("FetchParkingSpotsTask", "Returning "+placesParking.size()+" items");
+
+        return placesParking;
+    }
+
+    /**
+     * Permet d'obtenir les places par position autour du rayon.
+     * @param param Les paramètres de récupération
+     * @return Les places de parking autour du point
+     */
+    @Nullable
+    private ArrayList<PlaceParking> getPlacesParkingAroundPosition(Params param) {
         ArrayList<PlaceParking> placesParking = new ArrayList<>();
 
         try {
             //télécharger le JSON depuis le serveur
-            String json = "";
-            URL url = new URL("https://parking.rsauget.fr:8080/sensors?latitude="+param.latitude
+            String json = getJSONFromServer("https://parking.rsauget.fr:8080/sensors?latitude="+param.latitude
                     +"&longitude="+param.longitude+"&radius="+param.radius);
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-
-            String line = reader.readLine();
-            while(line != null) {
-                json += line;
-                line = reader.readLine();
-            }
-            reader.close();
 
             try {
                 //traiter ce JSON pour fabriquer des PlaceParking
@@ -79,14 +105,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
                 for(int i = 0; i < sensors.length(); i++) {
                     JSONObject sensor = sensors.getJSONObject(i);
 
-                    PlaceParking thisSpot = new PlaceParking(
-                            sensor.getInt("_id"),
-                            getState(sensor.getString("etat")),
-                            (float) sensor.getDouble("latitude"),
-                            (float) sensor.getDouble("longitude"),
-                            sensor.getInt("idRue"),
-                            sensor.getLong("derniereMaj"),
-                            sensor.getString("adresse"));
+                    PlaceParking thisSpot = getPlaceParkingFromJSON(sensor);
 
                     placesParking.add(thisSpot);
 
@@ -120,15 +139,73 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             Log.w("FetchParkingSpotsTask", "Input-output error!", e);
             placesParking = null;
         }
-
-        //mise en cache des parkings
-        Log.v("FetchParkingSpotsTask", "Start caching");
-        placesParking = loadOrSaveSpots(placesParking, param);
-        Log.v("FetchParkingSpotsTask", "End caching");
-
-        if(placesParking != null) Log.d("FetchParkingSpotsTask", "Returning "+placesParking.size()+" items");
-
         return placesParking;
+    }
+
+    /**
+     * Obtient une place de parking par id
+     * @param param Paramètres (contient l'id)
+     * @return La place de parking
+     */
+    private PlaceParking getPlaceParkingById(Params param) {
+        PlaceParking placeParking = null;
+        try {
+            try {
+                String json = getJSONFromServer("https://parking.rsauget.fr:8080/sensors/"+param.id);
+
+                JSONObject obj = new JSONObject(json);
+                placeParking = getPlaceParkingFromJSON(obj);
+            } catch (JSONException | IllegalArgumentException e) {
+                Log.e("FetchParkingSpotsTask", "JSON returned by server is invalid!", e);
+                placeParking = null;
+            }
+        } catch (IOException e) {
+            Log.w("FetchParkingSpotsTask", "Input-output error!", e);
+            placeParking = null;
+        }
+        return placeParking;
+    }
+
+    /**
+     * Permet d'obtenir la réponse complète du serveur sous forme de String.
+     * @param urlString URL à récupérer
+     * @return Réponse du serveur
+     * @throws IOException En cas d'erreur de connexion.
+     */
+    @NonNull
+    private String getJSONFromServer(String urlString) throws IOException {
+        Log.v("FetchParkingSpotsTask", "Retrieving from server url "+urlString);
+
+        String json = "";
+        URL url = new URL(urlString);
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+
+        String line = reader.readLine();
+        while(line != null) {
+            json += line;
+            line = reader.readLine();
+        }
+        reader.close();
+        return json;
+    }
+
+    /**
+     * Permet de convertir un JSONObject représentant une place de parking (par capteur), en objet PlaceParking.
+     * @param sensor JSONObject représentant la place
+     * @return L'objet PlaceParking
+     * @throws JSONException Si le JSON n'est pas au format attendu
+     */
+    @NonNull
+    private PlaceParking getPlaceParkingFromJSON(JSONObject sensor) throws JSONException {
+        return new PlaceParking(
+                                sensor.getInt("_id"),
+                                getState(sensor.getString("etat")),
+                                (float) sensor.getDouble("latitude"),
+                                (float) sensor.getDouble("longitude"),
+                                sensor.getInt("idRue"),
+                                sensor.getLong("derniereMaj"),
+                                sensor.getString("adresse"));
     }
 
     /**
@@ -167,9 +244,9 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
     @Override
     protected void onPostExecute(ArrayList<PlaceParking> places) {
         if(places == null) {
-            activity.listePlacesFailure();
+            callback.listePlacesFailure();
         } else {
-            activity.setListePlaces(places);
+            callback.setListePlaces(places);
         }
     }
 
@@ -182,9 +259,14 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
      * Paramètres d'exécution de la tâche de récupération des places de parking.
      */
     protected static class Params {
+        public enum Mode { AROUND_POSITION, BY_ID }
+        private Mode mode;
+
         private double latitude;
         private double longitude;
         private int radius;
+
+        private int id;
 
         /**
          * Permet de créer des paramètres, qui pourront être passés à la tâche.
@@ -193,10 +275,12 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
          * @param radius Rayon (en mètres) par rapport à la position de référence,
          *               dans laquelle il faut trouver des places de parking
          */
-        public Params(double latitude, double longitude, int radius) {
+        public Params(Mode mode, double latitude, double longitude, int radius, int id) {
+            this.mode = mode;
             this.latitude = latitude;
             this.longitude = longitude;
             this.radius = radius;
+            this.id = id;
         }
     }
 
@@ -207,7 +291,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
      * @return Places à afficher
      */
     private ArrayList<PlaceParking> loadOrSaveSpots(final ArrayList<PlaceParking> spots, Params params) {
-        String path = activity.getCacheDir().getPath() + File.separator + "parkingspots.txt";
+        String path = context.getCacheDir().getPath() + File.separator + "parkingspots.txt";
 
         List<PlaceParking> cached = new LinkedList<>();
 
@@ -289,5 +373,9 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
         }
     }
 
+    public interface Callback {
+        void listePlacesFailure();
+        void setListePlaces(ArrayList<PlaceParking> parks);
+    }
 }
 

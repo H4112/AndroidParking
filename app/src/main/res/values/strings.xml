@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">OnlyPark</string>
+    <string name="app_name" translatable="false">Park\'in</string>
 
     <string name="search">Search</string>
     <string name="best_place">Best parking space</string>
@@ -55,4 +55,9 @@
     <string name="ok">OK</string>
     <string name="no_result">No result found, please retry.</string>
     <string name="error">Error</string>
+    <string name="anti_theft_text">We will make sure it does not move</string>
+    <string name="anti_theft_title">Anti-Theft enabled</string>
+    <string name="car_moving_text">Is it you?</string>
+    <string name="car_moving_title">Your car is moving!</string>
+    <string name="distance_unknown">Unknown</string>
 </resources>

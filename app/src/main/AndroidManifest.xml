@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.h4112.androidparking" >
+    package="com.h4112.androidparking">
 
     <uses-permission android:name="com.example.googlemaps.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -16,24 +16,24 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:supportsRtl="true">
-
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
         <activity
-            android:name="com.h4112.androidparking.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="com.h4112.androidparking.Settings"
-            android:label="@string/app_name"
-            android:exported="false">
+            android:name=".Settings"
+            android:exported="false"
+            android:label="@string/option_location_settings">
             <intent-filter>
                 <action android:name="android.intent.action.Params" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -41,6 +41,11 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCBQK_MiOUDPUsOPVdTmXpBiRL4zQqhuD0" />
+
+        <service
+            android:name=".AntiTheftService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

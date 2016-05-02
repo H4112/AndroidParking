@@ -22,7 +22,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -64,7 +63,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.ConnectionCallbacks, FetchParkingSpotsTask.Callback,
         GoogleApiClient.OnConnectionFailedListener, LocationListener  {
 
     //constantes
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //constantes de sauvegarde
     private static final String SAVE_MAP_INIT = "mapViewInitialized";
-    private static final String SAVE_FIRST_SPOT_LIST = "gotFirstSpotList";
+    private static final String SAVE_SHOW_ALERT_DIALOG = "showAlertDialog";
     private static final String SAVE_SPOT_LIST = "listePlaces";
     private static final String SAVE_MY_LOCATION = "myLocation";
     private static final String SAVE_SELECTED_PARK = "selectedPark";
@@ -108,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng myLocation = null;
     private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
     private PlaceParking selectedPark = null;
-    private boolean gotFirstSpotList = false;
+    private boolean showAlertDialog = true;
 
     //variables non sauvegardées
     private PlaceParking reservedPark = null;
@@ -142,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if(savedInstanceState != null) {
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
-            gotFirstSpotList = savedInstanceState.getBoolean(SAVE_FIRST_SPOT_LIST);
+            showAlertDialog = savedInstanceState.getBoolean(SAVE_SHOW_ALERT_DIALOG);
             listePlaces = savedInstanceState.getParcelableArrayList(SAVE_SPOT_LIST);
             myLocation = savedInstanceState.getParcelable(SAVE_MY_LOCATION);
             selectedPark = savedInstanceState.getParcelable(SAVE_SELECTED_PARK);
@@ -179,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onSaveInstanceState(outState);
 
         outState.putBoolean(SAVE_MAP_INIT, mapViewInitialized);
-        outState.putBoolean(SAVE_FIRST_SPOT_LIST, gotFirstSpotList);
+        outState.putBoolean(SAVE_SHOW_ALERT_DIALOG, showAlertDialog);
         outState.putParcelableArrayList(SAVE_SPOT_LIST, listePlaces);
         outState.putParcelable(SAVE_MY_LOCATION, myLocation);
         outState.putParcelable(SAVE_SELECTED_PARK, selectedPark);
@@ -798,8 +797,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(googleMap != null) {
             LatLng target = googleMap.getCameraPosition().target;
 
-            task = new FetchParkingSpotsTask(this);
-            task.execute(new FetchParkingSpotsTask.Params(target.latitude, target.longitude, radius));
+            task = new FetchParkingSpotsTask(this, this);
+            task.execute(new FetchParkingSpotsTask.Params(FetchParkingSpotsTask.Params.Mode.AROUND_POSITION,
+                    target.latitude, target.longitude, radius, 0));
         }
     }
 
@@ -808,6 +808,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * le serveur ou le cache.
      * @param parkingList Liste des places de parking
      */
+    @Override
     public void setListePlaces(ArrayList<PlaceParking> parkingList){
         task = null;
 
@@ -815,16 +816,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         displayAllParkingSpots(listePlaces);
 
-        gotFirstSpotList = true;
+        showAlertDialog = false;
     }
 
     /**
      * Retour de FetchParkingSpotsTask : appelé lorsque la liste de parkings n'a pas pu être récupérée.
      */
+    @Override
     public void listePlacesFailure() {
         task = null;
 
-        if(!gotFirstSpotList) {
+        if(showAlertDialog) {
             //aucune récupération n'a fonctionné depuis le lancement de l'application
             stopUpdateTimer();
 
@@ -839,6 +841,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .setNegativeButton(getString(R.string.close), null)
                     .setCancelable(false)
                     .show();
+
+            showAlertDialog = false;
         }
     }
 
@@ -923,12 +927,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             etat.setText(selectedPark.getEtatString(this));
             tempsLibreOccupee.setText(selectedPark.getDurationString(this));
 
-            double dist = (int) selectedPark.getDistanceFromPoint(new LatLng(myLocation.latitude, myLocation.longitude));
+            if(myLocation != null) {
+                double dist = (int) selectedPark.getDistanceFromPoint(new LatLng(myLocation.latitude, myLocation.longitude));
 
-            if(dist > 1000) {
-                distance.setText(getString(R.string.kilometers, new DecimalFormat("0.0").format(dist/1000)));
+                if (dist > 1000) {
+                    distance.setText(getString(R.string.kilometers, new DecimalFormat("0.0").format(dist / 1000)));
+                } else {
+                    distance.setText(getString(R.string.meters, (int) (Math.round(dist / 10) * 10)));
+                }
             } else {
-                distance.setText(getString(R.string.meters, (int) (Math.round(dist / 10) * 10)));
+                distance.setText(R.string.distance_unknown);
             }
         }
         else{
@@ -984,6 +992,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }.start();
 
         reservedPark = selectedPark;
+
+        /*
+        if(selectedPark.getEtat() != PlaceParking.Etat.GRANDLYON) runAntiTheft();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = prefs.edit();
+        edit.putFloat("positionlat", (float) selectedPark.getPosition().latitude);
+        edit.putFloat("positionlong", (float) selectedPark.getPosition().longitude);
+        edit.putInt("parkid", selectedPark.getId());
+        edit.apply();
+        */
+    }
+
+    private void runAntiTheft() {
+        Intent i = new Intent(this, AntiTheftService.class);
+        i.putExtra("position", selectedPark.getPosition());
+        i.putExtra("id", selectedPark.getId());
+
+        startService(i);
     }
 
     /**

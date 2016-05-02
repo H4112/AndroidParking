@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">OnlyPark</string>
 
     <string name="search">Rechercher</string>
     <string name="best_place">Meilleure place</string>
@@ -53,4 +52,9 @@
     <string name="ok">OK</string>
     <string name="connect_error_geocoder">Impossible de récupérer les résultats, veuillez vérifier votre connexion Internet.</string>
     <string name="error">Erreur</string>
+    <string name="anti_theft_text">Votre voiture est surveillée</string>
+    <string name="anti_theft_title">Antivol activé</string>
+    <string name="car_moving_text">Est-ce bien vous ?</string>
+    <string name="car_moving_title">Votre voiture est en mouvement !</string>
+    <string name="distance_unknown">Inconnue</string>
 </resources>
