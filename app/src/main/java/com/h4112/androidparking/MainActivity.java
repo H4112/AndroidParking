@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String SAVE_SPOT_LIST = "listePlaces";
     private static final String SAVE_MY_LOCATION = "myLocation";
     private static final String SAVE_SELECTED_PARK = "selectedPark";
+    private static final String SAVE_FOLLOWING_USER = "followingUser";
 
     //variables sauvegardées
     private boolean mapViewInitialized = false;
@@ -119,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<PlaceParking> listePlaces = new ArrayList<>();
     private PlaceParking selectedPark = null;
     private boolean showAlertDialog = true;
+    private boolean isFollowingUser = true;
 
     //variables non sauvegardées
     private PlaceParking reservedPark = null;
@@ -165,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             listePlaces = savedInstanceState.getParcelableArrayList(SAVE_SPOT_LIST);
             myLocation = savedInstanceState.getParcelable(SAVE_MY_LOCATION);
             selectedPark = savedInstanceState.getParcelable(SAVE_SELECTED_PARK);
+            isFollowingUser = savedInstanceState.getBoolean(SAVE_FOLLOWING_USER);
 
             splashLaunchScreen.setVisibility(View.GONE);
         } else {
@@ -212,6 +215,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        View inputChecker = findViewById(R.id.inputCatcher);
+        if (inputChecker != null) {
+            inputChecker.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.v("MainActivity", "Not following user");
+                    isFollowingUser = false;
+
+                    return false;
+                }
+            });
+        }
+
         setScrollablePanelInvisible();
 
         if(getSupportActionBar() != null)
@@ -227,6 +243,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         outState.putParcelableArrayList(SAVE_SPOT_LIST, listePlaces);
         outState.putParcelable(SAVE_MY_LOCATION, myLocation);
         outState.putParcelable(SAVE_SELECTED_PARK, selectedPark);
+        outState.putBoolean(SAVE_FOLLOWING_USER, isFollowingUser);
     }
 
     @Override
@@ -343,6 +360,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.getUiSettings().setCompassEnabled(false);
         googleMap.getUiSettings().setRotateGesturesEnabled(false);
 
+        googleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                Log.v("MainActivity", "Following user");
+                isFollowingUser = true;
+
+                return false;
+            }
+        });
+
         // Généré automatiquement
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -417,6 +444,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapViewInitialized = true;
         } else if(googleMap == null) {
             Log.w("MainActivity", "googleMap = null");
+        }
+
+        if(isFollowingUser) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLng(
+                    new LatLng(location.getLatitude(), location.getLongitude())));
         }
     }
 
