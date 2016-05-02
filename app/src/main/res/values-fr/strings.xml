@@ -25,9 +25,9 @@
 
     <string name="portee">Portée</string>
 
-    <string name="time_h">"%1$s h et %2$s min"</string>
-    <string name="time_m">"%1$s min"</string>
-    <string name="time_now">"Quelques instants"</string>
+    <string name="time_h">"il y a %1$s h et %2$s min"</string>
+    <string name="time_m">"il y a %1$s min"</string>
+    <string name="time_now">il y a moins de 1 min</string>
 
     <string name="afficherPlacesPortee">Rayon de recherche</string>
     <string name="distance">Distance</string>
@@ -57,4 +57,5 @@
     <string name="car_moving_text">Est-ce bien vous ?</string>
     <string name="car_moving_title">Votre voiture est en mouvement !</string>
     <string name="distance_unknown">Inconnue</string>
+    <string name="last_update">Mise à jour</string>
 </resources>

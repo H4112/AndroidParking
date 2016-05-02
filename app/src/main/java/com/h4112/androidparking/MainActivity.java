@@ -22,18 +22,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.ListView;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
@@ -45,7 +44,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -73,12 +71,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     //constantes
     private static final int UPDATE_INTERVAL = 10000;
     private static final int FASTEST_UPDATE_INTERVAL = 5000;
-    private static final int PARKING_UPDATE_INTERVAL = 5000;
+    private static final int PARKING_UPDATE_INTERVAL = 10000;
+    private static final int SPLASH_LAUNCH_SCREEN_DURATION = 2000;
     private static final int ITEM_PARAMETRES = 0;
     private static final int ITEM_GARE = 1;
     private static final int ITEM_COMPTE = 2;
     private String[][] MENU_OPTIONS;
-    private final String URI_RESOURCE = "android.resource://com.h4112.androidparking/";
+    private static final String URI_RESOURCE = "android.resource://com.h4112.androidparking/";
 
     //vues
     private GoogleMap googleMap;
@@ -94,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker markerSelectedPark;
     private AlertDialog failDialog = null;
     private RelativeLayout progressBarLayout;
+    private FrameLayout splashLaunchScreen;
 
     //clusters
     private ClusterManager<PlaceParking> mClusterManager;
@@ -142,11 +142,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     getString(R.string.option_location_account)
                 },
                 {
-                        URI_RESOURCE+R.drawable.ic_settings_black_24dp,URI_RESOURCE+R.drawable.ic_pin_drop_black_24dp,URI_RESOURCE+R.drawable.ic_account_circle_black_24dp
+                    URI_RESOURCE+R.drawable.ic_settings_black_24dp,
+                    URI_RESOURCE+R.drawable.ic_pin_drop_black_24dp,
+                    URI_RESOURCE+R.drawable.ic_account_circle_black_24dp
                 }
         };
 
         setContentView(R.layout.activity_maps);
+
+        splashLaunchScreen = (FrameLayout) findViewById(R.id.splash_launch_screen);
 
         if(savedInstanceState != null) {
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
@@ -154,6 +158,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             listePlaces = savedInstanceState.getParcelableArrayList(SAVE_SPOT_LIST);
             myLocation = savedInstanceState.getParcelable(SAVE_MY_LOCATION);
             selectedPark = savedInstanceState.getParcelable(SAVE_SELECTED_PARK);
+
+            splashLaunchScreen.setVisibility(View.GONE);
+        } else {
+            splashLaunchScreen.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+
+            if(getSupportActionBar() != null) getSupportActionBar().hide();
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(getSupportActionBar() != null) getSupportActionBar().show();
+                    splashLaunchScreen.setVisibility(View.GONE);
+
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                }
+            }, SPLASH_LAUNCH_SCREEN_DURATION);
+
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
 
         initPlayServices();
@@ -376,7 +404,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(googleMap != null && !mapViewInitialized) {
             //zoomer sur la position si c'est la première fois
             CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myLocation, 15);
-            googleMap.animateCamera(yourLocation);
+            googleMap.moveCamera(yourLocation);
 
             mapViewInitialized = true;
         } else if(googleMap == null) {

@@ -47,7 +47,7 @@
                         android:layout_column="0"
                         android:layout_marginRight="20dp"
                         android:layout_marginEnd="20dp"
-                        android:text="@string/since" />
+                        android:text="@string/last_update" />
 
                     <TextView
                         android:layout_width="match_parent"

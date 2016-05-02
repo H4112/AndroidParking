@@ -28,15 +28,15 @@
 
     <string name="portee_cle" translatable="false">portee</string>
 
-    <string name="time_h">"%1$s hour(s) and %2$s minute(s)"</string>
-    <string name="time_m">"%1$s minute(s)"</string>
-    <string name="time_now">"Less than a minute"</string>
+    <string name="time_h">"%1$s h %2$s min ago"</string>
+    <string name="time_m">"%1$s min ago"</string>
+    <string name="time_now">less than 1 minute ago</string>
 
     <string name="afficherPlacesPortee">Search radius</string>
     <string name="distance">Distance</string>
     <string name="meters">%1$s meters</string>
     <string name="kilometers">%1$s kilometer(s)</string>
-    <string name="parking">Parking </string>
+    <string name="parking">Parking</string>
     <string name="public_spot">Public</string>
     <string name="private_spot">Private</string>
     <string name="since">For</string>
@@ -60,9 +60,13 @@
     <string name="car_moving_text">Is it you?</string>
     <string name="car_moving_title">Your car is moving!</string>
     <string name="distance_unknown">Unknown</string>
-    <string name="parking_public_key">parking_public_key</string>
-    <string name="parking_private_key">parking_prives_key</string>
-    <string name="place_moving_key">places_en_cours_key</string>
-    <string name="place_busy_key">places_occupees_key</string>
-    <string name="place_libre_key">places_libres_key</string>
+
+    <string name="parking_public_key" translatable="false">parking_public_key</string>
+    <string name="parking_private_key" translatable="false">parking_prives_key</string>
+    <string name="place_moving_key" translatable="false">places_en_cours_key</string>
+    <string name="place_busy_key" translatable="false">places_occupees_key</string>
+    <string name="place_libre_key" translatable="false">places_libres_key</string>
+
+    <string name="last_update">Last update</string>
+>>>>>>> Splash screen + sliding up panel changes (problem was not solved)
 </resources>
