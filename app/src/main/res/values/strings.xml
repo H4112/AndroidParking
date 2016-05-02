@@ -28,9 +28,9 @@
 
     <string name="portee_cle" translatable="false">portee</string>
 
-    <string name="time_h">"%1$s h %2$s min ago"</string>
-    <string name="time_m">"%1$s min ago"</string>
-    <string name="time_now">less than 1 minute ago</string>
+    <string name="time_h">"%1$s h %2$s min"</string>
+    <string name="time_m">"%1$s min"</string>
+    <string name="time_now">less than 1 minute</string>
 
     <string name="afficherPlacesPortee">Search radius</string>
     <string name="distance">Distance</string>
@@ -41,9 +41,9 @@
     <string name="private_spot">Private</string>
     <string name="since">For</string>
 
-    <string name="free_spot">Free space</string>
-    <string name="busy_spot">Busy space</string>
-    <string name="moving_spot">Space is being freed</string>
+    <string name="free_spot">Free space for %1$s</string>
+    <string name="busy_spot">Busy space for %1$s</string>
+    <string name="moving_spot">Space is being freed for %1$s</string>
     <string name="unknown_spot">Unknown state</string>
 
     <string name="yes_countdown">Yes (%1$s)</string>
@@ -68,5 +68,6 @@
     <string name="place_libre_key" translatable="false">places_libres_key</string>
 
     <string name="last_update">Last update</string>
->>>>>>> Splash screen + sliding up panel changes (problem was not solved)
+    <string name="depuis">%1$s ago</string>
+    >>>>>>> Splash screen + sliding up panel changes (problem was not solved)
 </resources>

@@ -25,9 +25,9 @@
 
     <string name="portee">Portée</string>
 
-    <string name="time_h">"il y a %1$s h et %2$s min"</string>
-    <string name="time_m">"il y a %1$s min"</string>
-    <string name="time_now">il y a moins de 1 min</string>
+    <string name="time_h">"%1$s h et %2$s min"</string>
+    <string name="time_m">"%1$s min"</string>
+    <string name="time_now">moins de 1 min</string>
 
     <string name="afficherPlacesPortee">Rayon de recherche</string>
     <string name="distance">Distance</string>
@@ -38,9 +38,9 @@
     <string name="private_spot">Privé</string>
     <string name="since">Depuis</string>
 
-    <string name="free_spot">Place libre</string>
-    <string name="busy_spot">Place occupée</string>
-    <string name="moving_spot">Place bientôt libre</string>
+    <string name="free_spot">Place libre depuis %1$s</string>
+    <string name="busy_spot">Place occupée depuis %1$s</string>
+    <string name="moving_spot">Place bientôt libre depuis %1$s</string>
     <string name="unknown_spot">État inconnu</string>
 
     <string name="yes_countdown">Oui (%1$s)</string>
@@ -58,4 +58,5 @@
     <string name="car_moving_title">Votre voiture est en mouvement !</string>
     <string name="distance_unknown">Inconnue</string>
     <string name="last_update">Mise à jour</string>
+    <string name="depuis">il y a %1$s</string>
 </resources>

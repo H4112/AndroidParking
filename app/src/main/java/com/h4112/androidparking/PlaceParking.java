@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -183,14 +184,17 @@ public class PlaceParking implements Parcelable, ClusterItem {
      * @return Description de l'état
      */
     public String getEtatString(Context c){
+        int hours = this.getDureeEtatActuelMin() / 60;
+        int mins = this.getDureeEtatActuelMin() % 60;
+
         if(this.getEtat() == Etat.LIBRE){
-            return c.getString(R.string.free_spot);
+            return c.getString(R.string.free_spot, getStringFromDuration(c, hours, mins));
         }
         else if(this.getEtat() == Etat.OCCUPEE){
-            return c.getString(R.string.busy_spot);
+            return c.getString(R.string.busy_spot, getStringFromDuration(c, hours, mins));
         }
         else if(this.getEtat() == Etat.EN_MOUVEMENT){
-            return c.getString(R.string.moving_spot);
+            return c.getString(R.string.moving_spot, getStringFromDuration(c, hours, mins));
         }
         else if(this.getEtat() == Etat.GRANDLYON){
             if(etatString == null) {
@@ -212,6 +216,11 @@ public class PlaceParking implements Parcelable, ClusterItem {
         int hours = this.getDureeEtatActuelMin() / 60;
         int mins = this.getDureeEtatActuelMin() % 60;
 
+        return c.getString(R.string.depuis, getStringFromDuration(c, hours, mins));
+    }
+
+    @NonNull
+    private String getStringFromDuration(Context c, int hours, int mins) {
         String infos;
         if(mins == 0 && hours == 0) {
             infos = c.getString(R.string.time_now);

@@ -36,6 +36,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private AlertDialog failDialog = null;
     private RelativeLayout progressBarLayout;
     private FrameLayout splashLaunchScreen;
+    private TableLayout tableLayout;
 
     //clusters
     private ClusterManager<PlaceParking> mClusterManager;
@@ -195,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         etat = (TextView)findViewById(R.id.etat);
         tempsLibreOccupee = (TextView)findViewById(R.id.tempsLibreOccupee);
         distance = (TextView)findViewById(R.id.distance);
+        tableLayout = (TableLayout)findViewById(R.id.tableLayout);
         progressBarLayout = (RelativeLayout) findViewById(R.id.progressBar);
         progressBarLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -564,16 +567,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onPanelCollapsed(View view) {
                     adresse.setSingleLine(true);
+
+                    tableLayout.requestLayout();
                 }
 
                 @Override
                 public void onPanelExpanded(View view) {
                     adresse.setSingleLine(false);
+
+                    tableLayout.requestLayout();
                 }
 
                 @Override
                 public void onPanelAnchored(View view) {
                     adresse.setSingleLine(false);
+
+                    tableLayout.requestLayout();
                 }
 
                 @Override
@@ -993,6 +1002,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             } else {
                 distance.setText(R.string.distance_unknown);
             }
+
+            tableLayout.requestLayout();
         }
         else{
             Log.d("MainActivity", "Aucune place selectionnée");
