@@ -119,21 +119,25 @@ public class PlaceParking implements Parcelable, ClusterItem {
      * Permet de changer l'icône et la couleur en fonction de l'état.
      */
     private void updateIcone(){
-        if(this.etat == Etat.LIBRE){
-            icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_libre);
-            color = Color.rgb(2, 224, 23);
-        }
-        else if(this.etat == Etat.OCCUPEE){
-            icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_occupee);
-            color = Color.rgb(255, 2, 2);
-        }else if(this.etat == Etat.EN_MOUVEMENT){
-            icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_en_mouvement);
-            color = Color.rgb(236, 194, 2);
-        }else if(this.etat == Etat.GRANDLYON && etatString != null){
-            color = Color.rgb(0, 0, 255);
-        }else{
-            icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_inconnu);
-            color = Color.rgb(64, 64, 64);
+        try {
+            if (this.etat == Etat.LIBRE) {
+                icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_libre);
+                color = Color.rgb(2, 224, 23);
+            } else if (this.etat == Etat.OCCUPEE) {
+                icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_occupee);
+                color = Color.rgb(255, 2, 2);
+            } else if (this.etat == Etat.EN_MOUVEMENT) {
+                icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_en_mouvement);
+                color = Color.rgb(236, 194, 2);
+            } else if (this.etat == Etat.GRANDLYON && etatString != null) {
+                color = Color.rgb(0, 0, 255);
+            } else {
+                icone = BitmapDescriptorFactory.fromResource(R.drawable.ic_inconnu);
+                color = Color.rgb(64, 64, 64);
+            }
+        } catch(NullPointerException npe) {
+            Log.v("PlaceParking", "Error: could not init icon");
+            icone = null;
         }
     }
 
