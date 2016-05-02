@@ -45,6 +45,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -115,6 +116,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     //variables non sauvegardées
     private PlaceParking reservedPark = null;
     private int radius;
+    private boolean displayPrivateParking;
+    private boolean displayPublicParking;
+    private boolean displayFreePlaces;
+    private boolean displayBusyPlaces;
+    private boolean displayMovingPlaces;
 
     //autres variables
     private GoogleApiClient mGoogleApiClient;
@@ -208,6 +214,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             edit.putInt(getResources().getString(R.string.portee_cle), radius);
             edit.apply();
         }
+
+        displayPrivateParking = preferences.getBoolean(getResources().getString(R.string.parking_private_key), true);
+        displayPublicParking = preferences.getBoolean(getResources().getString(R.string.parking_public_key), true);
+        displayFreePlaces = preferences.getBoolean(getResources().getString(R.string.place_libre_key), true);
+        displayBusyPlaces = preferences.getBoolean(getResources().getString(R.string.place_busy_key), true);
+        displayMovingPlaces = preferences.getBoolean(getResources().getString(R.string.place_moving_key), true);
 
         Log.d("MainActivity", "RADIUS ---- " + radius);
 
@@ -729,13 +741,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param place Place à afficher
      */
     private void displayPark(PlaceParking place){
-        if(place != null){
-            mClusterManager.addItem(place);
+        if(place != null) {
+            if ( (displayPrivateParking && place.getEtat() == PlaceParking.Etat.GRANDLYON) ||
+                    (displayPublicParking && place.getEtat() != PlaceParking.Etat.GRANDLYON) ) {
 
-            Marker mark = mClusterRenderer.getMarker(place);
-            if(mark != null) {
-                mark.setIcon(place.getEtat() == PlaceParking.Etat.GRANDLYON ?
-                        mClusterRenderer.getMarkerForGrandLyon(place) : place.getIcone());
+                    if( (displayFreePlaces && (
+                            (displayFreePlaces && place.getEtat() == PlaceParking.Etat.LIBRE) ||
+                            (displayBusyPlaces && place.getEtat() == PlaceParking.Etat.OCCUPEE) ||
+                            (displayMovingPlaces && place.getEtat() == PlaceParking.Etat.EN_MOUVEMENT)
+                            )) || displayPrivateParking
+                    ) {
+
+                        mClusterManager.addItem(place);
+                        Marker mark = mClusterRenderer.getMarker(place);
+                        if (mark != null) {
+                            mark.setIcon(place.getEtat() == PlaceParking.Etat.GRANDLYON ?
+                                    mClusterRenderer.getMarkerForGrandLyon(place) : place.getIcone());
+                        }
+                    }
             }
         }
     }

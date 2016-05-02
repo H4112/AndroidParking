@@ -9,17 +9,17 @@
         <CheckBoxPreference
             android:title="@string/placesLibres"
             android:defaultValue="true"
-            android:key="places_libres_key" />
+            android:key="@string/place_libre_key" />
 
         <CheckBoxPreference
             android:title="@string/placesOccupées"
             android:defaultValue="true"
-            android:key="places_occupees_key" />
+            android:key="@string/place_busy_key" />
 
         <CheckBoxPreference
             android:title="@string/placesEnCoursLiberation"
             android:defaultValue="true"
-            android:key="places_en_cours_key" />
+            android:key="@string/place_moving_key" />
 
     </PreferenceCategory>
 
@@ -29,12 +29,12 @@
     <CheckBoxPreference
             android:title="@string/parkingPublics"
             android:defaultValue="true"
-            android:key="parking_publis_key" />
+            android:key="@string/parking_public_key" />
 
         <CheckBoxPreference
             android:title="@string/parkingPrives"
             android:defaultValue="true"
-            android:key="parking_prives_key" />
+            android:key="@string/parking_private_key" />
 
     </PreferenceCategory>
 

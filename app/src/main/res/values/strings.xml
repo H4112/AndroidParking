@@ -60,4 +60,9 @@
     <string name="car_moving_text">Is it you?</string>
     <string name="car_moving_title">Your car is moving!</string>
     <string name="distance_unknown">Unknown</string>
+    <string name="parking_public_key">parking_public_key</string>
+    <string name="parking_private_key">parking_prives_key</string>
+    <string name="place_moving_key">places_en_cours_key</string>
+    <string name="place_busy_key">places_occupees_key</string>
+    <string name="place_libre_key">places_libres_key</string>
 </resources>
