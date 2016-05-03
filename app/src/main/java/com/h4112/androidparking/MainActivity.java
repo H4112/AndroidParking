@@ -794,7 +794,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mClusterManager.cluster();
 
-        if (selectedPark != null) {
+        if (selectedPark != null && iAmParked != null) {
 
             if(iAmParked.equals(selectedPark)){
                 actionMarkerClick(selectedPark);
@@ -1049,6 +1049,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
                             .position(iAmParked.getPosition());
                     markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
+                    selectedPark = iAmParked;
+                    updateParkingData();
                     int distance = (int)iAmParked.getDistanceFromPoint(myLocation);
                     Toast.makeText(this, "Vous êtes garé à "+distance+" m", Toast.LENGTH_SHORT).show();
                 } else {
@@ -1087,7 +1089,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 distance.setText(R.string.distance_unknown);
             }
 
-            if((selectedPark.getEtat() == PlaceParking.Etat.GRANDLYON || selectedPark.getEtat() == PlaceParking.Etat.LIBRE) && !selectedPark.equals(iAmParked)){
+            if((selectedPark.getEtat() == PlaceParking.Etat.GRANDLYON || selectedPark.getEtat() == PlaceParking.Etat.LIBRE) && selectedPark != iAmParked ){
                 parkHere.setVisibility(View.VISIBLE);
             }
             else{
