@@ -69,7 +69,9 @@
 
     <string name="last_update">Last update</string>
     <string name="depuis">%1$s ago</string>
-    <string name="parked_here">Votre emplacement a été sauvegardé</string>
-    <string name="already_parked">Vous êtes déjà garé</string>
     <string name="park_here">I am parked here</string>
+
+    <string name="distance_gare">You are parked at %1$s m</string>
+    <string name="already_parked">You are already parked</string>
+    <string name="parked_here">Your position has been saved</string>
 </resources>

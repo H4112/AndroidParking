@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String SAVE_MY_LOCATION = "myLocation";
     private static final String SAVE_SELECTED_PARK = "selectedPark";
     private static final String SAVE_FOLLOWING_USER = "followingUser";
+    private static final String SAVE_PANEL_EXPANDED = "panelExpanded";
 
     //variables sauvegardées
     private boolean mapViewInitialized = false;
@@ -161,6 +162,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
 
         splashLaunchScreen = (FrameLayout) findViewById(R.id.splash_launch_screen);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.contains("parkid")) {
+            iAmParked = new PlaceParking(prefs.getInt("parkid", -1), PlaceParking.Etat.INCONNU,
+                    prefs.getFloat("positionlat", 0), prefs.getFloat("positionlong", 0), -1,
+                    System.currentTimeMillis(), getString(R.string.unknown_spot));
+        }
 
         if (savedInstanceState != null) {
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
@@ -223,6 +231,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Toast.makeText(MainActivity.this, R.string.parked_here, Toast.LENGTH_LONG).show();
                     iAmParked = selectedPark;
                     updateParkingData();
+
+                    if(selectedPark.getEtat() != PlaceParking.Etat.GRANDLYON) runAntiTheft();
+
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putFloat("positionlat", (float) selectedPark.getPosition().latitude);
+                    edit.putFloat("positionlong", (float) selectedPark.getPosition().longitude);
+                    edit.putInt("parkid", selectedPark.getId());
+                    edit.apply();
                 }
             }
         });
@@ -245,12 +262,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (getSupportActionBar() != null)
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.RED));
 
-        boolean panelExpanded = (panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
-                || panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED);
+        boolean panelExpanded = false;
+        if(savedInstanceState != null) {
+            panelExpanded = savedInstanceState.getBoolean(SAVE_PANEL_EXPANDED, false);
+        }
 
-        parkHere.setVisibility(panelExpanded && shouldShowParkHere()
-                ? View.VISIBLE : View.GONE);
-        adresse.setSingleLine(panelExpanded);
+        parkHere.setVisibility(panelExpanded && shouldShowParkHere() ? View.VISIBLE : View.GONE);
+        adresse.setSingleLine(!panelExpanded);
 
     }
 
@@ -269,6 +287,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         outState.putParcelable(SAVE_MY_LOCATION, myLocation);
         outState.putParcelable(SAVE_SELECTED_PARK, selectedPark);
         outState.putBoolean(SAVE_FOLLOWING_USER, isFollowingUser);
+        outState.putBoolean(SAVE_PANEL_EXPANDED,
+                (panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
+                || panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED));
     }
 
     @Override
@@ -813,27 +834,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mClusterManager.cluster();
 
-        if (selectedPark != null && iAmParked != null) {
-
-            if(iAmParked.equals(selectedPark)){
-                actionMarkerClick(selectedPark);
-                Log.d("MainActivity", "Reselected iAmParked Spot");
+        if (selectedPark != null) {
+            boolean found = false;
+            for (PlaceParking p : listePlaces) {
+                if (p.getId() == selectedPark.getId()) {
+                    Log.v("MainActivity", "Auto-Selected parking spot");
+                    actionMarkerClick(selectedPark);
+                    found = true;
+                    break;
+                }
             }
-            else {
-                boolean found = false;
-                for (PlaceParking p : listePlaces) {
-                    if (p.getId() == selectedPark.getId()) {
-                        Log.v("MainActivity", "Auto-Selected parking spot");
-                        updateParkingData();
-                        found = true;
-                        break;
-                    }
-                }
 
-                if (!found) {
-                    Log.i("MainActivity", "Selected park not found: Unselecting");
-                    resetParkingData();
-                }
+            if (!found && !selectedPark.equals(iAmParked)) {
+                Log.i("MainActivity", "Selected park not found: Unselecting");
+                resetParkingData();
             }
         }
     }
@@ -1064,14 +1078,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             case ITEM_GARE:
                 if (iAmParked != null) {
-                    markerSelectedPark.remove();
-                    MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
-                            .position(iAmParked.getPosition());
-                    markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
-                    selectedPark = iAmParked;
-                    updateParkingData();
+                    actionMarkerClick(iAmParked);
+
                     int distance = (int)iAmParked.getDistanceFromPoint(myLocation);
-                    Toast.makeText(this, "Vous êtes garé à "+distance+" m", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.distance_gare, distance), Toast.LENGTH_SHORT).show();
 
                     int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                             40, getResources().getDisplayMetrics());
@@ -1177,17 +1187,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }.start();
         }
-
-        /*
-        if(selectedPark.getEtat() != PlaceParking.Etat.GRANDLYON) runAntiTheft();
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor edit = prefs.edit();
-        edit.putFloat("positionlat", (float) selectedPark.getPosition().latitude);
-        edit.putFloat("positionlong", (float) selectedPark.getPosition().longitude);
-        edit.putInt("parkid", selectedPark.getId());
-        edit.apply();
-        */
     }
 
     private void runAntiTheft() {

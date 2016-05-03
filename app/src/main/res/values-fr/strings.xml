@@ -60,4 +60,8 @@
     <string name="last_update">Mise à jour</string>
     <string name="depuis">il y a %1$s</string>
     <string name="park_here">Je suis garé ici</string>
+
+    <string name="distance_gare">Vous êtes garé à %1$s m</string>
+    <string name="already_parked">Vous êtes déjà garé</string>
+    <string name="parked_here">Votre emplacement a été sauvegardé</string>
 </resources>

@@ -108,7 +108,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
 
                     PlaceParking thisSpot = getPlaceParkingFromJSON(sensor);
 
-                    placesParking.add(thisSpot);
+                    if(thisSpot != null) placesParking.add(thisSpot);
 
                     Log.v("FetchParkingSpotsTask", "New spot: "+thisSpot);
                 }
@@ -117,23 +117,27 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
                 JSONArray parkings = fullResponse.getJSONArray("parkings");
 
                 for(int i = 0; i < parkings.length(); i++) {
-                    JSONObject parking = parkings.getJSONObject(i);
+                    try {
+                        JSONObject parking = parkings.getJSONObject(i);
 
-                    JSONObject loc = parking.getJSONObject("loc");
-                    JSONArray params = loc.getJSONArray("coordinates");
+                        JSONObject loc = parking.getJSONObject("loc");
+                        JSONArray params = loc.getJSONArray("coordinates");
 
-                    PlaceParking thisSpot = new PlaceParking(
-                            - Integer.parseInt(parking.getString("_id")),
-                            parking.getString("etat"),
-                            (float) params.getDouble(1),
-                            (float) params.getDouble(0),
-                            - Integer.parseInt(parking.getString("_id")),
-                            getLastUpdate(parking.getString("last_update")),
-                            parking.getString("nom"));
+                        PlaceParking thisSpot = new PlaceParking(
+                                -Integer.parseInt(parking.getString("_id")),
+                                parking.getString("etat"),
+                                (float) params.getDouble(1),
+                                (float) params.getDouble(0),
+                                -Integer.parseInt(parking.getString("_id")),
+                                getLastUpdate(parking.getString("last_update")),
+                                parking.getString("nom"));
 
-                    placesParking.add(thisSpot);
+                        placesParking.add(thisSpot);
 
-                    Log.v("FetchParkingSpotsTask", "New spot: "+thisSpot);
+                        Log.v("FetchParkingSpotsTask", "New spot: " + thisSpot);
+                    } catch(JSONException | IllegalArgumentException e) {
+                        Log.w("FetchParkingSpotsTask", "JSON invalid for single spot.", e);
+                    }
                 }
             } catch (JSONException | IllegalArgumentException e) {
                 Log.e("FetchParkingSpotsTask", "JSON returned by server is invalid!", e);
@@ -152,7 +156,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
      * @return La place de parking
      */
     private PlaceParking getPlaceParkingById(Params param) {
-        PlaceParking placeParking = null;
+        PlaceParking placeParking;
         try {
             try {
                 String json = getJSONFromServer("https://parking.rsauget.fr:8080/sensors/"+param.id);
@@ -198,21 +202,26 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
      * Permet de convertir un JSONObject représentant une place de parking (par capteur), en objet PlaceParking.
      * @param sensor JSONObject représentant la place
      * @return L'objet PlaceParking
-     * @throws JSONException Si le JSON n'est pas au format attendu
      */
-    @NonNull
-    private PlaceParking getPlaceParkingFromJSON(JSONObject sensor) throws JSONException {
-        JSONObject loc = sensor.getJSONObject("loc");
-        JSONArray params = loc.getJSONArray("coordinates");
+    private PlaceParking getPlaceParkingFromJSON(JSONObject sensor) {
+        try {
+            JSONObject loc = sensor.getJSONObject("loc");
+            JSONArray params = loc.getJSONArray("coordinates");
 
-        return new PlaceParking(
-            sensor.getInt("_id"),
-            getState(sensor.getString("etat")),
-            (float) params.getDouble(1),
-            (float) params.getDouble(0),
-            sensor.getInt("idRue"),
-            sensor.getLong("derniereMaj"),
-            sensor.getString("adresse"));
+            return new PlaceParking(
+                sensor.getInt("_id"),
+                getState(sensor.getString("etat")),
+                (float) params.getDouble(1),
+                (float) params.getDouble(0),
+                sensor.getInt("idRue"),
+                sensor.getLong("derniereMaj"),
+                sensor.getString("adresse"));
+
+        } catch(JSONException | IllegalArgumentException e) {
+            Log.w("FetchParkingSpotsTask", "JSON invalid for single spot.", e);
+
+            return null;
+        }
     }
 
     /**
