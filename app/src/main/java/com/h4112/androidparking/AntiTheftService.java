@@ -104,7 +104,7 @@ public class AntiTheftService extends Service implements FetchParkingSpotsTask.C
     }
 
     @Override
-    public void listePlacesFailure() {
+    public void listePlacesFailure(FetchParkingSpotsTask.Params params) {
         Log.w("AntiTheftService", "Could not get spot list!");
 
         task = null;

@@ -610,7 +610,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             panelLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
                 @Override
                 public void onPanelSlide(View view, float v) {
-
+                    if(v > 0.5) {
+                        panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                    }
                 }
 
                 @Override
@@ -625,6 +627,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     adresse.setSingleLine(false);
 
                     tableLayout.requestLayout();
+                    //panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
                 }
 
                 @Override
@@ -926,23 +929,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         listePlaces = parkingList;
 
-        Circle prevRadiusCircle = radiusCircle;
-        Marker prevRadiusPin = radiusPin;
-
-        radiusCircle = googleMap.addCircle(new CircleOptions()
-                .center(new LatLng(params.latitude, params.longitude))
-                .radius(radius)
-                .fillColor(getResources().getColor(R.color.circleFillColor))
-                .strokeColor(getResources().getColor(R.color.circleStrokeColor))
-                .strokeWidth(2));
-
-        if (prevRadiusCircle != null) prevRadiusCircle.remove();
-
-        radiusPin = googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(params.latitude, params.longitude))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
-
-        if (prevRadiusPin != null) prevRadiusPin.remove();
+        updateCirclePin(params);
 
         displayAllParkingSpots(listePlaces);
 
@@ -953,7 +940,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Retour de FetchParkingSpotsTask : appelé lorsque la liste de parkings n'a pas pu être récupérée.
      */
     @Override
-    public void listePlacesFailure() {
+    public void listePlacesFailure(FetchParkingSpotsTask.Params params) {
         task = null;
 
         if (showAlertDialog) {
@@ -973,8 +960,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .show();
 
             showAlertDialog = false;
+        } else {
+            updateCirclePin(params);
         }
     }
+
+    private void updateCirclePin(FetchParkingSpotsTask.Params params) {
+        Circle prevRadiusCircle = radiusCircle;
+        Marker prevRadiusPin = radiusPin;
+
+        radiusCircle = googleMap.addCircle(new CircleOptions()
+                .center(new LatLng(params.latitude, params.longitude))
+                .radius(radius)
+                .fillColor(getResources().getColor(R.color.circleFillColor))
+                .strokeColor(getResources().getColor(R.color.circleStrokeColor))
+                .strokeWidth(2));
+
+        if (prevRadiusCircle != null) prevRadiusCircle.remove();
+
+        radiusPin = googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(params.latitude, params.longitude))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
+                .anchor(0.5f, 0.5f));
+
+        if (prevRadiusPin != null) prevRadiusPin.remove();
+    }
+
 
     ////////////////////////// BOUTONS ACTION BAR //////////////////////////
 
