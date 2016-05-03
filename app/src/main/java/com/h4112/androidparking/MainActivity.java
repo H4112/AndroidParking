@@ -244,6 +244,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.RED));
+
+        boolean panelExpanded = (panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
+                || panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED);
+
+        parkHere.setVisibility(panelExpanded && shouldShowParkHere()
+                ? View.VISIBLE : View.GONE);
+        adresse.setSingleLine(panelExpanded);
+
+    }
+
+    private boolean shouldShowParkHere() {
+        return (selectedPark.getEtat() == PlaceParking.Etat.GRANDLYON ||
+                selectedPark.getEtat() == PlaceParking.Etat.OCCUPEE) && !selectedPark.equals(iAmParked);
     }
 
     @Override
@@ -610,9 +623,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             panelLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
                 @Override
                 public void onPanelSlide(View view, float v) {
-                    if(v > 0.5) {
-                        panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
-                    }
+                    parkHere.setVisibility(v >= 0.49 && shouldShowParkHere() ? View.VISIBLE : View.GONE);
                 }
 
                 @Override
@@ -627,7 +638,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     adresse.setSingleLine(false);
 
                     tableLayout.requestLayout();
-                    //panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
                 }
 
                 @Override
@@ -635,6 +645,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     adresse.setSingleLine(false);
 
                     tableLayout.requestLayout();
+
+                    parkHere.setVisibility(shouldShowParkHere() ? View.VISIBLE : View.GONE);
                 }
 
                 @Override
@@ -760,6 +772,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param placeParking Place de parking choisie
      */
     private void actionMarkerClick(PlaceParking placeParking) {
+        for(PlaceParking p: listePlaces) {
+            if(p.equals(placeParking)) {
+                placeParking = p;
+                break;
+            }
+        }
+
         if (markerSelectedPark != null) {
             markerSelectedPark.remove();
         }
@@ -1089,17 +1108,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 distance.setText(R.string.distance_unknown);
             }
 
-            if((selectedPark.getEtat() == PlaceParking.Etat.GRANDLYON || selectedPark.getEtat() == PlaceParking.Etat.LIBRE) && selectedPark != iAmParked ){
-                parkHere.setVisibility(View.VISIBLE);
-            }
-            else{
-                parkHere.setVisibility(View.INVISIBLE);
-            }
-
             tableLayout.requestLayout();
         } else {
             Log.d("MainActivity", "Aucune place selectionnée");
         }
+
+        boolean panelExpanded = (panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
+                || panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED);
+        parkHere.setVisibility(panelExpanded && shouldShowParkHere()
+                ? View.VISIBLE : View.GONE);
     }
 
     /**

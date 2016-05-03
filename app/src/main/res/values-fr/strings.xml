@@ -27,7 +27,7 @@
 
     <string name="time_h">"%1$s h et %2$s min"</string>
     <string name="time_m">"%1$s min"</string>
-    <string name="time_now">moins de 1 min</string>
+    <string name="time_now"><![CDATA[< 1 min]]></string>
 
     <string name="afficherPlacesPortee">Rayon de recherche</string>
     <string name="distance">Distance</string>
@@ -59,4 +59,5 @@
     <string name="distance_unknown">Inconnue</string>
     <string name="last_update">Mise à jour</string>
     <string name="depuis">il y a %1$s</string>
+    <string name="park_here">Je suis garé ici</string>
 </resources>

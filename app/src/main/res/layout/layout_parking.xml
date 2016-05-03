@@ -1,144 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/scrollablePanel"
-        android:background="@android:color/white"
-        android:layout_weight="1">
+<RelativeLayout android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/scrollablePanel"
+    android:background="@android:color/white"
+    android:layout_weight="1"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:id="@+id/adresse"
-            android:fontFamily="sans-serif-light"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginRight="82dp"
-            android:layout_marginEnd="82dp"
-            android:singleLine="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/adresse"
+        android:fontFamily="sans-serif-light"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="82dp"
+        android:layout_marginEnd="82dp"
+        android:singleLine="true" />
 
-        <TableLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tableLayout"
-            android:layout_below="@+id/etat"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="82dp"
-            android:layout_marginEnd="82dp"
-            android:layout_alignLeft="@+id/etat"
-            android:layout_alignStart="@+id/etat">
-
-            <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:id="@+id/texteTempsLibreOccupee"
-                            android:layout_column="0"
-                            android:layout_marginRight="20dp"
-                            android:layout_marginEnd="20dp"
-                            android:text="@string/last_update" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:id="@+id/tempsLibreOccupee"
-                            android:layout_column="1"
-                            android:layout_marginBottom="10dp" />
-
-                    </TableRow>
-
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:text="@string/distance"
-                            android:id="@+id/textView5"
-                            android:layout_column="0"
-                            android:layout_marginRight="20dp"
-                            android:layout_marginEnd="20dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:id="@+id/distance"
-                            android:layout_column="1"
-                            android:layout_marginBottom="10dp" />
-
-                    </TableRow>
-
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:text="@string/parking"
-                            android:id="@+id/textView7"
-                            android:layout_column="0"
-                            android:layout_marginRight="20dp"
-                            android:layout_marginEnd="20dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:text="@string/public_spot"
-                            android:id="@+id/textView8"
-                            android:layout_column="1"
-                            android:layout_marginBottom="10dp" />
-
-                    </TableRow>
-        </TableLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/etat"
-            android:layout_below="@+id/adresse"
-            android:layout_alignLeft="@+id/adresse"
-            android:layout_alignStart="@+id/adresse"
-            android:layout_marginRight="82dp"
-            android:layout_marginEnd="82dp"
-            android:layout_marginTop="10dp" />
-
-
-    </RelativeLayout>
-
-
-    <Button
-        android:id="@+id/parkHere"
-        android:layout_alignParentBottom="true"
+    <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:textSize="10pt"
-        android:background="#5588DD"
-        android:text="Je me gare ici !"
-        android:layout_weight="1"/>
+        android:layout_height="wrap_content"
+        android:id="@+id/tableLayout"
+        android:layout_below="@+id/etat"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="82dp"
+        android:layout_marginEnd="82dp"
+        android:layout_alignLeft="@+id/etat"
+        android:layout_alignStart="@+id/etat">
 
-</LinearLayout>
+        <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:id="@+id/texteTempsLibreOccupee"
+                        android:layout_column="0"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:text="@string/last_update" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:id="@+id/tempsLibreOccupee"
+                        android:layout_column="1"
+                        android:layout_marginBottom="10dp" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="@string/distance"
+                        android:id="@+id/textView5"
+                        android:layout_column="0"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginEnd="20dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:id="@+id/distance"
+                        android:layout_column="1"
+                        android:layout_marginBottom="10dp" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="@string/parking"
+                        android:id="@+id/textView7"
+                        android:layout_column="0"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginEnd="20dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="@string/public_spot"
+                        android:id="@+id/textView8"
+                        android:layout_column="1"
+                        android:layout_marginBottom="10dp" />
+
+                </TableRow>
+    </TableLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/etat"
+        android:layout_below="@+id/adresse"
+        android:layout_alignLeft="@+id/adresse"
+        android:layout_alignStart="@+id/adresse"
+        android:layout_marginRight="82dp"
+        android:layout_marginEnd="82dp"
+        android:layout_marginTop="10dp" />
+
+
+</RelativeLayout>
