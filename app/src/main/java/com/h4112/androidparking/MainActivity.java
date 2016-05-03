@@ -805,7 +805,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 for (PlaceParking p : listePlaces) {
                     if (p.getId() == selectedPark.getId()) {
                         Log.v("MainActivity", "Auto-Selected parking spot");
-                        //actionMarkerClick(p);
+                        updateParkingData();
                         found = true;
                         break;
                     }
