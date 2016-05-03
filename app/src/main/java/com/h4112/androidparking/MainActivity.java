@@ -41,14 +41,11 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -142,12 +139,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Runnable update = null;
     private FetchParkingSpotsTask task;
     private GeocoderTask task2;
-    private Runnable mapDragFollower = null;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
 
     ////////////////////////// ACTIVITY LIFECYCLE //////////////////////////
     @Override
@@ -253,9 +244,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.RED));
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -280,9 +268,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         radius = preferences.getInt(getResources().getString(R.string.portee_cle), -1);
@@ -304,46 +289,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d("MainActivity", "RADIUS ---- " + radius);
 
         startUpdateTimer();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.h4112.androidparking/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.h4112.androidparking/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
 
         stopUpdateTimer();
-        if (failDialog != null) failDialog.dismiss();
-        if (task2 != null) task2.cancel(true);
-        if (mapDragFollower != null) handler.removeCallbacks(mapDragFollower);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.disconnect();
+
+        if(failDialog != null) failDialog.dismiss();
+        if(task2 != null) task2.cancel(true);
     }
 
     ////////////////////////// LISTENERS //////////////////////////
@@ -784,21 +740,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onCameraChange(CameraPosition cameraPosition) {
                 mClusterManager.onCameraChange(cameraPosition);
 
-                Log.v("MainActivity", "Map got dragged");
-
-                if (mapDragFollower != null) handler.removeCallbacks(mapDragFollower);
-                mapDragFollower = new Runnable() {
-                    @Override
-                    public void run() {
-                        mapDragFollower = null;
-
-                        Log.i("MainActivity", "Camera moved! I must refresh right now.");
-                        stopUpdateTimer();
-                        startUpdateTimer();
-                    }
-                };
-
-                handler.postDelayed(mapDragFollower, 200);
+                Log.i("MainActivity", "Camera moved! I must refresh right now.");
+                stopUpdateTimer();
+                startUpdateTimer();
             }
         });
         googleMap.setOnMarkerClickListener(mClusterManager);
@@ -878,7 +822,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if ((displayPrivateParking && place.getEtat() == PlaceParking.Etat.GRANDLYON) ||
                     (displayPublicParking && place.getEtat() != PlaceParking.Etat.GRANDLYON)) {
 
-                if ((displayFreePlaces && (
+                if ((displayPublicParking && (
                         (displayFreePlaces && place.getEtat() == PlaceParking.Etat.LIBRE) ||
                                 (displayBusyPlaces && place.getEtat() == PlaceParking.Etat.OCCUPEE) ||
                                 (displayMovingPlaces && place.getEtat() == PlaceParking.Etat.EN_MOUVEMENT)
@@ -1074,7 +1018,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private void onDrawerItemSelected(int position) {
         Log.d("MainActivity", "Chose position " + position);
-        switch (position) {
+
+        drawer.closeDrawer(GravityCompat.START);
+
+        switch(position){
             case ITEM_PARAMETRES:
                 Intent activitySettings = new Intent(MainActivity.this, Settings.class);
                 startActivity(activitySettings);
