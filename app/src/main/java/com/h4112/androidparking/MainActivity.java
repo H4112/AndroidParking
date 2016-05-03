@@ -777,8 +777,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param listPark Liste des places à afficher
      */
     private void displayAllParkingSpots(List<PlaceParking> listPark) {
-        if (markerSelectedPark != null) markerSelectedPark.remove();
-
         mClusterManager.clearItems();
         for (PlaceParking place : listPark) {
             displayPark(place);
@@ -794,20 +792,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mClusterManager.cluster();
 
         if (selectedPark != null) {
-            boolean found = false;
 
-            for (PlaceParking p : listePlaces) {
-                if (p.getId() == selectedPark.getId()) {
-                    Log.v("MainActivity", "Auto-Selected parking spot");
-                    actionMarkerClick(p);
-                    found = true;
-                    break;
-                }
+            if(iAmParked.equals(selectedPark)){
+                actionMarkerClick(selectedPark);
+                Log.d("MainActivity", "Reselected iAmParked Spot");
             }
+            else {
+                boolean found = false;
+                for (PlaceParking p : listePlaces) {
+                    if (p.getId() == selectedPark.getId()) {
+                        Log.v("MainActivity", "Auto-Selected parking spot");
+                        //actionMarkerClick(p);
+                        found = true;
+                        break;
+                    }
+                }
 
-            if (!found) {
-                Log.i("MainActivity", "Selected park not found: Unselecting");
-                resetParkingData();
+                if (!found) {
+                    Log.i("MainActivity", "Selected park not found: Unselecting");
+                    resetParkingData();
+                }
             }
         }
     }
