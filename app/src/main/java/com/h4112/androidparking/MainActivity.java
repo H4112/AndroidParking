@@ -827,6 +827,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 (displayBusyPlaces && place.getEtat() == PlaceParking.Etat.OCCUPEE) ||
                                 (displayMovingPlaces && place.getEtat() == PlaceParking.Etat.EN_MOUVEMENT)
                 )) || (displayPrivateParking && place.getEtat() == PlaceParking.Etat.GRANDLYON)
+                        || place.getEtat() == PlaceParking.Etat.INCONNU
                         ) {
 
                     mClusterManager.addItem(place);
@@ -1029,6 +1030,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             case ITEM_GARE:
                 if (iAmParked != null) {
+                    markerSelectedPark.remove();
                     MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
                             .position(iAmParked.getPosition());
                     markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
