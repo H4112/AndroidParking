@@ -790,7 +790,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         updateParkingData();
 
         boolean occupe = (selectedPark != null ? selectedPark.getEtat() : null) == PlaceParking.Etat.OCCUPEE;
-        itinerary.setVisibility(occupe ? View.INVISIBLE : View.VISIBLE);
+        itinerary.setVisibility(occupe && !placeParking.equals(iAmParked) ? View.INVISIBLE : View.VISIBLE);
     }
 
     /**
@@ -1072,6 +1072,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     updateParkingData();
                     int distance = (int)iAmParked.getDistanceFromPoint(myLocation);
                     Toast.makeText(this, "Vous êtes garé à "+distance+" m", Toast.LENGTH_SHORT).show();
+
+                    int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                            40, getResources().getDisplayMetrics());
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
+                            new LatLngBounds.Builder()
+                                .include(myLocation)
+                                .include(iAmParked.getPosition())
+                                .build(), px));
                 } else {
                     Toast.makeText(this, R.string.location_vehicule, Toast.LENGTH_LONG).show();
                 }
@@ -1137,34 +1145,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d("MainActivity", "From " + Double.toString(myLocation.latitude) + ", " + Double.toString(myLocation.longitude) + " to " +
                 Float.toString(selectedPark.getLatitude()) + ", " + Float.toString(selectedPark.getLongitude()));
 
-        //demander si on veut lancer la navigation
-        final AlertDialog popup = new AlertDialog.Builder(this)
-                .setMessage(getString(R.string.run_navigation))
-                .setPositiveButton(getString(R.string.yes_5), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        launchNavigation();
-                    }
-                })
-                .setNegativeButton(getString(R.string.no), null)
-                .setTitle(getString(R.string.reserved_spots))
-                .show();
+        if(selectedPark.equals(iAmParked)) {
+            launchNavigation("w");
+        } else {
+            //demander si on veut lancer la navigation
+            final AlertDialog popup = new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.run_navigation))
+                    .setPositiveButton(getString(R.string.yes_5), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            launchNavigation("d");
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.no), null)
+                    .setTitle(getString(R.string.reserved_spots))
+                    .show();
 
-        //mettre en place le compte à rebours sélectionnant automatiquement "oui"
-        new CountDownTimer(6000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                popup.getButton(DialogInterface.BUTTON_POSITIVE).setText(getString(R.string.yes_countdown, millisUntilFinished / 1000));
-            }
-
-            @Override
-            public void onFinish() {
-                if (popup.isShowing()) {
-                    launchNavigation();
-                    popup.dismiss();
+            //mettre en place le compte à rebours sélectionnant automatiquement "oui"
+            new CountDownTimer(6000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    popup.getButton(DialogInterface.BUTTON_POSITIVE).setText(getString(R.string.yes_countdown, millisUntilFinished / 1000));
                 }
-            }
-        }.start();
+
+                @Override
+                public void onFinish() {
+                    if (popup.isShowing()) {
+                        launchNavigation("d");
+                        popup.dismiss();
+                    }
+                }
+            }.start();
+        }
 
         /*
         if(selectedPark.getEtat() != PlaceParking.Etat.GRANDLYON) runAntiTheft();
@@ -1189,10 +1201,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Lance la navigation Google Maps vers la destination (selectedPark).
      */
-    private void launchNavigation() {
+    private void launchNavigation(String modeC) {
         Log.d("MainActivity", "--- Lancement de la navigation ---");
 
-        String mode = "&mode=c";
+        String mode = "&mode="+modeC;
         Intent intent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse(String.format("google.navigation:ll=%s,%s%s",
                         markerSelectedPark.getPosition().latitude, markerSelectedPark.getPosition().longitude, mode)));
