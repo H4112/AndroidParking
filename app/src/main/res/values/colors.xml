@@ -8,7 +8,7 @@
 
     <color name="spashScreenColor">#FF0000</color>
 
-    <color name="circleStrokeColor">#d50000</color>
-    <color name="circleFillColor">#11d50000</color>
+    <color name="circleStrokeColor">#616161</color>
+    <color name="circleFillColor">#33616161</color>
 
 </resources>

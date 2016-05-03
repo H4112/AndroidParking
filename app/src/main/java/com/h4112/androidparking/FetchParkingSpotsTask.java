@@ -251,7 +251,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
     @Override
     protected void onPostExecute(ArrayList<PlaceParking> places) {
         if(places == null) {
-            callback.listePlacesFailure();
+            callback.listePlacesFailure(param);
         } else {
             callback.setListePlaces(places, param);
         }
@@ -381,7 +381,7 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
     }
 
     public interface Callback {
-        void listePlacesFailure();
+        void listePlacesFailure(Params params);
         void setListePlaces(ArrayList<PlaceParking> parks, Params params);
     }
 }
