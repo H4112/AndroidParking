@@ -484,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (googleMap != null && !mapViewInitialized) {
             //zoomer sur la position si c'est la première fois
-            CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myLocation, 15);
+            CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myLocation, 17);
             googleMap.moveCamera(yourLocation);
 
             mapViewInitialized = true;
@@ -556,7 +556,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void geocodingFinished(LatLng result) {
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(result, 15));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(result, 17));
 
         progressBarLayout.setVisibility(View.GONE);
 

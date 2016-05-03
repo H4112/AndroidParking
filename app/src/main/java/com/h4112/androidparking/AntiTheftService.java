@@ -128,7 +128,7 @@ public class AntiTheftService extends Service implements FetchParkingSpotsTask.C
                 Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
                 Notification notification = new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setSmallIcon(R.drawable.warning)
                         .setContentTitle(getString(R.string.car_moving_title))
                         .setContentText(getString(R.string.car_moving_text))
                         .setSound(alarmSound)

@@ -195,6 +195,8 @@ public class FetchParkingSpotsTask extends AsyncTask<FetchParkingSpotsTask.Param
             line = reader.readLine();
         }
         reader.close();
+
+        Log.v("FetchParkingSpotsTask", "Retrieving from server finished");
         return json;
     }
 
