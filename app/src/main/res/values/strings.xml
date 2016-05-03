@@ -69,5 +69,6 @@
 
     <string name="last_update">Last update</string>
     <string name="depuis">%1$s ago</string>
-    >>>>>>> Splash screen + sliding up panel changes (problem was not solved)
+    <string name="parked_here">Votre emplacement a été sauvegardé</string>
+    <string name="already_parked">Vous êtes déjà garé</string>
 </resources>

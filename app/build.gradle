@@ -31,4 +31,5 @@ dependencies {
     compile 'com.android.support:design:23.3.0'
     compile 'com.pavelsikun:material-seekbar-preference:0.12.1'
     compile 'com.google.maps.android:android-maps-utils:0.4.3'
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }

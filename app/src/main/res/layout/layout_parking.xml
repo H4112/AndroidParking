@@ -107,8 +107,6 @@
                         android:layout_marginBottom="10dp" />
 
                 </TableRow>
-
-
     </TableLayout>
 
     <TextView
@@ -122,5 +120,15 @@
         android:layout_marginRight="82dp"
         android:layout_marginEnd="82dp"
         android:layout_marginTop="10dp" />
+
+
+    <Button
+        android:id="@+id/parkHere"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:textSize="10pt"
+        android:background="#FF0000"
+        android:text="Je me gare ici !" />
 
 </RelativeLayout>

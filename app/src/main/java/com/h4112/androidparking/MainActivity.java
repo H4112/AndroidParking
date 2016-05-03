@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -40,11 +41,14 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -70,7 +74,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, FetchParkingSpotsTask.Callback,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener  {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     //constantes
     private static final int UPDATE_INTERVAL = 10000;
@@ -101,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TableLayout tableLayout;
     private Circle radiusCircle;
     private Marker radiusPin;
+    private Button parkHere;
 
     //clusters
     private ClusterManager<PlaceParking> mClusterManager;
@@ -121,9 +126,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PlaceParking selectedPark = null;
     private boolean showAlertDialog = true;
     private boolean isFollowingUser = true;
+    private PlaceParking iAmParked = null;
 
     //variables non sauvegardées
-    private PlaceParking reservedPark = null;
     private int radius;
     private boolean displayPrivateParking;
     private boolean displayPublicParking;
@@ -138,6 +143,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FetchParkingSpotsTask task;
     private GeocoderTask task2;
     private Runnable mapDragFollower = null;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     ////////////////////////// ACTIVITY LIFECYCLE //////////////////////////
     @Override
@@ -146,14 +156,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         MENU_OPTIONS = new String[][]{
                 {
-                    getString(R.string.option_location_settings),
-                    getString(R.string.option_location_gare),
-                    getString(R.string.option_location_account)
+                        getString(R.string.option_location_settings),
+                        getString(R.string.option_location_gare),
+                        getString(R.string.option_location_account)
                 },
                 {
-                    URI_RESOURCE+R.drawable.ic_settings_black_24dp,
-                    URI_RESOURCE+R.drawable.ic_pin_drop_black_24dp,
-                    URI_RESOURCE+R.drawable.ic_account_circle_black_24dp
+                        URI_RESOURCE + R.drawable.ic_settings_black_24dp,
+                        URI_RESOURCE + R.drawable.ic_pin_drop_black_24dp,
+                        URI_RESOURCE + R.drawable.ic_account_circle_black_24dp
                 }
         };
 
@@ -161,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         splashLaunchScreen = (FrameLayout) findViewById(R.id.splash_launch_screen);
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mapViewInitialized = savedInstanceState.getBoolean(SAVE_MAP_INIT);
             showAlertDialog = savedInstanceState.getBoolean(SAVE_SHOW_ALERT_DIALOG);
             listePlaces = savedInstanceState.getParcelableArrayList(SAVE_SPOT_LIST);
@@ -178,12 +188,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             });
 
-            if(getSupportActionBar() != null) getSupportActionBar().hide();
+            if (getSupportActionBar() != null) getSupportActionBar().hide();
 
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if(getSupportActionBar() != null) getSupportActionBar().show();
+                    if (getSupportActionBar() != null) getSupportActionBar().show();
                     splashLaunchScreen.setVisibility(View.GONE);
 
                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -201,17 +211,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         initSearchView();
         initFAB();
 
-        adresse = (TextView)findViewById(R.id.adresse);
-        etat = (TextView)findViewById(R.id.etat);
-        tempsLibreOccupee = (TextView)findViewById(R.id.tempsLibreOccupee);
-        distance = (TextView)findViewById(R.id.distance);
-        tableLayout = (TableLayout)findViewById(R.id.tableLayout);
+        adresse = (TextView) findViewById(R.id.adresse);
+        etat = (TextView) findViewById(R.id.etat);
+        tempsLibreOccupee = (TextView) findViewById(R.id.tempsLibreOccupee);
+        distance = (TextView) findViewById(R.id.distance);
+        parkHere = (Button) findViewById(R.id.parkHere);
+        tableLayout = (TableLayout) findViewById(R.id.tableLayout);
         progressBarLayout = (RelativeLayout) findViewById(R.id.progressBar);
         progressBarLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 //on empêche l'utilisateur de cliquer
                 return true;
+            }
+        });
+        parkHere.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (iAmParked != selectedPark){
+                    Toast.makeText(MainActivity.this, R.string.parked_here, Toast.LENGTH_LONG).show();
+                    iAmParked = selectedPark;
+                    updateParkingData();
+                }
             }
         });
 
@@ -230,8 +251,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         setScrollablePanelInvisible();
 
-        if(getSupportActionBar() != null)
+        if (getSupportActionBar() != null)
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.RED));
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -256,11 +280,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         radius = preferences.getInt(getResources().getString(R.string.portee_cle), -1);
 
-        if(radius == -1) {
+        if (radius == -1) {
             radius = 200;
 
             SharedPreferences.Editor edit = preferences.edit();
@@ -277,28 +304,57 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d("MainActivity", "RADIUS ---- " + radius);
 
         startUpdateTimer();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.h4112.androidparking/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.h4112.androidparking/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
 
         stopUpdateTimer();
-        if(failDialog != null) failDialog.dismiss();
-        if(task2 != null) task2.cancel(true);
-        if(mapDragFollower != null) handler.removeCallbacks(mapDragFollower);
+        if (failDialog != null) failDialog.dismiss();
+        if (task2 != null) task2.cancel(true);
+        if (mapDragFollower != null) handler.removeCallbacks(mapDragFollower);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.disconnect();
     }
 
     ////////////////////////// LISTENERS //////////////////////////
     @Override
     public void onBackPressed() {
-        if(drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if(panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
-                ||panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED) {
+        } else if (panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
+                || panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED) {
             panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        } else if(panelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.HIDDEN) {
+        } else if (panelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.HIDDEN) {
             resetParkingData();
         } else {
             super.onBackPressed();
@@ -317,7 +373,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_search:
                 //montrer / cacher la barre de recherche
                 searchview.setIconified(false);
-                if(searchview.getVisibility() == View.VISIBLE
+                if (searchview.getVisibility() == View.VISIBLE
                         && progressBarLayout.getVisibility() != View.VISIBLE) {
                     searchview.setVisibility(View.GONE);
                     searchview.setQuery("", false);
@@ -329,11 +385,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             case R.id.action_find_place:
                 //sélectionner la place la plus proche du centre de l'écran
-                if(markerSelectedPark!=null){
+                if (markerSelectedPark != null) {
                     markerSelectedPark.remove();
                 }
                 selectedPark = findBestPlace();
-                if(selectedPark != null) {
+                if (selectedPark != null) {
                     MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
                             .position(selectedPark.getPosition());
                     markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
@@ -436,17 +492,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         double longitude = location.getLongitude();
         myLocation = new LatLng(latitude, longitude);
 
-        if(googleMap != null && !mapViewInitialized) {
+        if (googleMap != null && !mapViewInitialized) {
             //zoomer sur la position si c'est la première fois
             CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(myLocation, 15);
             googleMap.moveCamera(yourLocation);
 
             mapViewInitialized = true;
-        } else if(googleMap == null) {
+        } else if (googleMap == null) {
             Log.w("MainActivity", "googleMap = null");
         }
 
-        if(isFollowingUser) {
+        if (isFollowingUser) {
             googleMap.animateCamera(CameraUpdateFactory.newLatLng(
                     new LatLng(location.getLatitude(), location.getLongitude())));
         }
@@ -533,7 +589,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private void initDrawerList() {
         List<Map<String, String>> options = new ArrayList<>();
-        for(int i=0; i<MENU_OPTIONS[0].length; i++) {
+        for (int i = 0; i < MENU_OPTIONS[0].length; i++) {
             options.add(getNameAndPictureOnlyMap(MENU_OPTIONS[0][i], MENU_OPTIONS[1][i]));
         }
 
@@ -553,6 +609,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Renvoie une nouvelle Map avec seulement un champ "name" renseigné.
+     *
      * @param name Le nom à renseigner
      * @return La nouvelle map créée
      */
@@ -582,8 +639,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .addApi(LocationServices.API)
                         .build();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -594,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void initSlidingUpPanel() {
         panelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
-        if(panelLayout != null) {
+        if (panelLayout != null) {
             panelLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
                 @Override
                 public void onPanelSlide(View view, float v) {
@@ -693,11 +749,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
                     float maxX = Float.MIN_VALUE, maxY = Float.MIN_VALUE;
 
-                    for(PlaceParking p : cluster.getItems()) {
-                        if(minX > p.getLatitude()) minX = p.getLatitude();
-                        if(minY > p.getLongitude()) minY = p.getLongitude();
-                        if(maxX < p.getLatitude()) maxX = p.getLatitude();
-                        if(maxY < p.getLongitude()) maxY = p.getLongitude();
+                    for (PlaceParking p : cluster.getItems()) {
+                        if (minX > p.getLatitude()) minX = p.getLatitude();
+                        if (minY > p.getLongitude()) minY = p.getLongitude();
+                        if (maxX < p.getLatitude()) maxX = p.getLatitude();
+                        if (maxY < p.getLongitude()) maxY = p.getLongitude();
                     }
 
                     LatLng upperleft = new LatLng(minX, minY);
@@ -730,7 +786,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 Log.v("MainActivity", "Map got dragged");
 
-                if(mapDragFollower != null) handler.removeCallbacks(mapDragFollower);
+                if (mapDragFollower != null) handler.removeCallbacks(mapDragFollower);
                 mapDragFollower = new Runnable() {
                     @Override
                     public void run() {
@@ -753,10 +809,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Appelé lorsque l'utilisateur appuie sur un marqueur.
+     *
      * @param placeParking Place de parking choisie
      */
-    private void actionMarkerClick(PlaceParking placeParking){
-        if(markerSelectedPark!=null){
+    private void actionMarkerClick(PlaceParking placeParking) {
+        if (markerSelectedPark != null) {
             markerSelectedPark.remove();
         }
         MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
@@ -772,18 +829,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Affiche toutes les places de parking données en paramètre.
+     *
      * @param listPark Liste des places à afficher
      */
-    private void displayAllParkingSpots(List<PlaceParking> listPark){
-        if(markerSelectedPark != null) markerSelectedPark.remove();
+    private void displayAllParkingSpots(List<PlaceParking> listPark) {
+        if (markerSelectedPark != null) markerSelectedPark.remove();
 
         mClusterManager.clearItems();
-        for(PlaceParking place : listPark){
+        for (PlaceParking place : listPark) {
             displayPark(place);
         }
-        for(Marker m : mClusterManager.getClusterMarkerCollection().getMarkers()) {
+        for (Marker m : mClusterManager.getClusterMarkerCollection().getMarkers()) {
             Cluster<PlaceParking> cluster = mClusterRenderer.getCluster(m);
-            if(cluster != null) {
+            if (cluster != null) {
                 MarkerOptions options = new MarkerOptions();
                 mClusterRenderer.onBeforeClusterRendered(cluster, options);
                 m.setIcon(options.getIcon());
@@ -791,11 +849,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mClusterManager.cluster();
 
-        if(selectedPark != null) {
+        if (selectedPark != null) {
             boolean found = false;
 
-            for(PlaceParking p : listePlaces) {
-                if(p.getId() == selectedPark.getId()) {
+            for (PlaceParking p : listePlaces) {
+                if (p.getId() == selectedPark.getId()) {
                     Log.v("MainActivity", "Auto-Selected parking spot");
                     actionMarkerClick(p);
                     found = true;
@@ -803,7 +861,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
 
-            if(!found) {
+            if (!found) {
                 Log.i("MainActivity", "Selected park not found: Unselecting");
                 resetParkingData();
             }
@@ -812,27 +870,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Affiche une place de parking sur la carte.
+     *
      * @param place Place à afficher
      */
-    private void displayPark(PlaceParking place){
-        if(place != null) {
-            if ( (displayPrivateParking && place.getEtat() == PlaceParking.Etat.GRANDLYON) ||
-                    (displayPublicParking && place.getEtat() != PlaceParking.Etat.GRANDLYON) ) {
+    private void displayPark(PlaceParking place) {
+        if (place != null) {
+            if ((displayPrivateParking && place.getEtat() == PlaceParking.Etat.GRANDLYON) ||
+                    (displayPublicParking && place.getEtat() != PlaceParking.Etat.GRANDLYON)) {
 
-                    if( (displayFreePlaces && (
-                            (displayFreePlaces && place.getEtat() == PlaceParking.Etat.LIBRE) ||
-                            (displayBusyPlaces && place.getEtat() == PlaceParking.Etat.OCCUPEE) ||
-                            (displayMovingPlaces && place.getEtat() == PlaceParking.Etat.EN_MOUVEMENT)
-                            )) || (displayPrivateParking && place.getEtat() == PlaceParking.Etat.GRANDLYON)
-                    ) {
+                if ((displayFreePlaces && (
+                        (displayFreePlaces && place.getEtat() == PlaceParking.Etat.LIBRE) ||
+                                (displayBusyPlaces && place.getEtat() == PlaceParking.Etat.OCCUPEE) ||
+                                (displayMovingPlaces && place.getEtat() == PlaceParking.Etat.EN_MOUVEMENT)
+                )) || (displayPrivateParking && place.getEtat() == PlaceParking.Etat.GRANDLYON)
+                        ) {
 
-                        mClusterManager.addItem(place);
-                        Marker mark = mClusterRenderer.getMarker(place);
-                        if (mark != null) {
-                            mark.setIcon(place.getEtat() == PlaceParking.Etat.GRANDLYON ?
-                                    mClusterRenderer.getMarkerForGrandLyon(place) : place.getIcone());
-                        }
+                    mClusterManager.addItem(place);
+                    Marker mark = mClusterRenderer.getMarker(place);
+                    if (mark != null) {
+                        mark.setIcon(place.getEtat() == PlaceParking.Etat.GRANDLYON ?
+                                mClusterRenderer.getMarkerForGrandLyon(place) : place.getIcone());
                     }
+                }
             }
         }
     }
@@ -849,14 +908,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Lance la méthode runUpdatePlaces avec le délai spécifié, qui sera rappelée à
      * intervalle régulier (en rappelant cette méthode).
+     *
      * @param delay Délai d'exécution de runUpdatePlaces
      */
     private void startUpdateTimer(int delay) {
-        if(update != null) {
+        if (update != null) {
             handler.removeCallbacks(update);
         }
 
-        Log.d("MainActivity", "Update timer STARTED! Delay "+delay);
+        Log.d("MainActivity", "Update timer STARTED! Delay " + delay);
 
         update = new Runnable() {
             @Override
@@ -875,10 +935,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void stopUpdateTimer() {
         Log.d("MainActivity", "Update timer STOPPED!");
 
-        if(update != null) {
+        if (update != null) {
             handler.removeCallbacks(update);
         }
-        if(task != null) {
+        if (task != null) {
             task.cancel(true);
             task = null;
         }
@@ -888,14 +948,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Lance la tâche de récupération des places de parking (FetchParkingSpotsTask).
      */
     private void runUpdatePlaces() {
-        if(task != null) {
+        if (task != null) {
             Log.d("MainActivity", "Launch request -> Do not want");
             return;
         }
 
-        Log.v("MainActivity", "RADIUS ---- "+radius);
+        Log.v("MainActivity", "RADIUS ---- " + radius);
 
-        if(googleMap != null) {
+        if (googleMap != null) {
             LatLng target = googleMap.getCameraPosition().target;
 
             task = new FetchParkingSpotsTask(this, this);
@@ -907,11 +967,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Retour de FetchParkingSpotsTask : donne une nouvelle liste de parkings récupérée depuis
      * le serveur ou le cache.
+     *
      * @param parkingList Liste des places de parking
-     * @param params Paramètres qui ont été donnés à la recherche de places
+     * @param params      Paramètres qui ont été donnés à la recherche de places
      */
     @Override
-    public void setListePlaces(ArrayList<PlaceParking> parkingList, FetchParkingSpotsTask.Params params){
+    public void setListePlaces(ArrayList<PlaceParking> parkingList, FetchParkingSpotsTask.Params params) {
         task = null;
 
         listePlaces = parkingList;
@@ -920,19 +981,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Marker prevRadiusPin = radiusPin;
 
         radiusCircle = googleMap.addCircle(new CircleOptions()
-            .center(new LatLng(params.latitude, params.longitude))
-            .radius(radius)
-            .fillColor(getResources().getColor(R.color.circleFillColor))
-            .strokeColor(getResources().getColor(R.color.circleStrokeColor))
-            .strokeWidth(2));
+                .center(new LatLng(params.latitude, params.longitude))
+                .radius(radius)
+                .fillColor(getResources().getColor(R.color.circleFillColor))
+                .strokeColor(getResources().getColor(R.color.circleStrokeColor))
+                .strokeWidth(2));
 
-        if(prevRadiusCircle != null) prevRadiusCircle.remove();
+        if (prevRadiusCircle != null) prevRadiusCircle.remove();
 
         radiusPin = googleMap.addMarker(new MarkerOptions()
-            .position(new LatLng(params.latitude, params.longitude))
-            .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
+                .position(new LatLng(params.latitude, params.longitude))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
 
-        if(prevRadiusPin != null) prevRadiusPin.remove();
+        if (prevRadiusPin != null) prevRadiusPin.remove();
 
         displayAllParkingSpots(listePlaces);
 
@@ -946,7 +1007,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void listePlacesFailure() {
         task = null;
 
-        if(showAlertDialog) {
+        if (showAlertDialog) {
             //aucune récupération n'a fonctionné depuis le lancement de l'application
             stopUpdateTimer();
 
@@ -970,17 +1031,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Permet de trouver la meilleure place (la plus proche du centre de l'écran).
+     *
      * @return La place trouvée, ou null s'il n'y a pas de place.
      */
-    private PlaceParking findBestPlace(){
+    private PlaceParking findBestPlace() {
         //Version naïve: Chemin le plus court à vol d'oiseau
 
         PlaceParking bestPlace = null;
         double minDistance = findFirstDistanceFreePlace();
-        for(PlaceParking place : listePlaces){
-            if(place.getDistanceFromPoint(googleMap.getCameraPosition().target) <= minDistance
-                    && place.getEtat()!=PlaceParking.Etat.OCCUPEE
-                    && place.getEtat()!=PlaceParking.Etat.INCONNU) {
+        for (PlaceParking place : listePlaces) {
+            if (place.getDistanceFromPoint(googleMap.getCameraPosition().target) <= minDistance
+                    && place.getEtat() != PlaceParking.Etat.OCCUPEE
+                    && place.getEtat() != PlaceParking.Etat.INCONNU) {
                 bestPlace = place;
                 minDistance = place.getDistanceFromPoint(googleMap.getCameraPosition().target);
             }
@@ -990,11 +1052,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Trouve une distance par rapport à une place libre ou sur le point de l'être.
+     *
      * @return Une distance
      */
-    private double findFirstDistanceFreePlace(){
-        for(PlaceParking place : listePlaces){
-            if(place.getEtat()!=PlaceParking.Etat.OCCUPEE && place.getEtat()!=PlaceParking.Etat.INCONNU) {
+    private double findFirstDistanceFreePlace() {
+        for (PlaceParking place : listePlaces) {
+            if (place.getEtat() != PlaceParking.Etat.OCCUPEE && place.getEtat() != PlaceParking.Etat.INCONNU) {
                 return place.getDistanceFromPoint(googleMap.getCameraPosition().target);
             }
         }
@@ -1006,23 +1069,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Appelé lorsqu'un élément du tiroir de navigation est sélectionné.
+     *
      * @param position Position de l'item sélectionné
      */
     private void onDrawerItemSelected(int position) {
         Log.d("MainActivity", "Chose position " + position);
-        switch(position){
+        switch (position) {
             case ITEM_PARAMETRES:
                 Intent activitySettings = new Intent(MainActivity.this, Settings.class);
                 startActivity(activitySettings);
                 break;
 
             case ITEM_GARE:
-                if(reservedPark != null){
+                if (iAmParked != null) {
                     MarkerOptions markerOptionsSelectedPark = new MarkerOptions()
-                            .position(reservedPark.getPosition());
+                            .position(iAmParked.getPosition());
                     markerSelectedPark = googleMap.addMarker(markerOptionsSelectedPark);
-                }
-                else {
+                    int distance = (int)iAmParked.getDistanceFromPoint(myLocation);
+                    Toast.makeText(this, "Vous êtes garé à "+distance+" m", Toast.LENGTH_SHORT).show();
+                } else {
                     Toast.makeText(this, R.string.location_vehicule, Toast.LENGTH_LONG).show();
                 }
                 break;
@@ -1034,20 +1099,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
     ////////////////////////// SLIDING UP PANEL //////////////////////////
 
     /**
      * Affiche les informations sur la place de parking selectedPark dans le SlidingUpPanel.
      */
-    private void updateParkingData(){
+    private void updateParkingData() {
         setScrollablePanelVisible();
-        if(selectedPark != null){
+        if (selectedPark != null) {
             adresse.setText(selectedPark.getAddress());
             etat.setText(selectedPark.getEtatString(this));
             tempsLibreOccupee.setText(selectedPark.getDurationString(this));
 
-            if(myLocation != null) {
+            if (myLocation != null) {
                 double dist = (int) selectedPark.getDistanceFromPoint(new LatLng(myLocation.latitude, myLocation.longitude));
 
                 if (dist > 1000) {
@@ -1059,9 +1123,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 distance.setText(R.string.distance_unknown);
             }
 
+            if((selectedPark.getEtat() == PlaceParking.Etat.GRANDLYON || selectedPark.getEtat() == PlaceParking.Etat.LIBRE) && !selectedPark.equals(iAmParked)){
+                parkHere.setVisibility(View.VISIBLE);
+            }
+            else{
+                parkHere.setVisibility(View.INVISIBLE);
+            }
+
             tableLayout.requestLayout();
-        }
-        else{
+        } else {
             Log.d("MainActivity", "Aucune place selectionnée");
         }
     }
@@ -1069,7 +1139,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Désélectionne la place actuellement choisie, et cache les informations.
      */
-    private void resetParkingData(){
+    private void resetParkingData() {
         selectedPark = null;
         if (markerSelectedPark != null) {
             markerSelectedPark.remove();
@@ -1106,14 +1176,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onFinish() {
-                if(popup.isShowing()) {
+                if (popup.isShowing()) {
                     launchNavigation();
                     popup.dismiss();
                 }
             }
         }.start();
-
-        reservedPark = selectedPark;
 
         /*
         if(selectedPark.getEtat() != PlaceParking.Etat.GRANDLYON) runAntiTheft();
@@ -1138,11 +1206,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Lance la navigation Google Maps vers la destination (selectedPark).
      */
-    private void launchNavigation(){
+    private void launchNavigation() {
         Log.d("MainActivity", "--- Lancement de la navigation ---");
 
-        String   mode = "&mode=c";
-        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+        String mode = "&mode=c";
+        Intent intent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse(String.format("google.navigation:ll=%s,%s%s",
                         markerSelectedPark.getPosition().latitude, markerSelectedPark.getPosition().longitude, mode)));
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -1152,16 +1220,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Affiche le SlidingUpPanel.
      */
-    private void setScrollablePanelVisible(){
+    private void setScrollablePanelVisible() {
         itinerary.setVisibility(View.VISIBLE);
-        if(panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN)
+        if (panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN)
             panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
     /**
      * Masque le SlidingUpPanel.
      */
-    private void setScrollablePanelInvisible(){
+    private void setScrollablePanelInvisible() {
         itinerary.setVisibility(View.INVISIBLE);
         panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
     }
